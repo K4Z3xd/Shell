@@ -43,6 +43,7 @@ src/gui/**/bin/
 src/gui/**/obj/
 src/bin/backups/
 src/bin/shell.configurator.json
+shell.portable.path
 dist/
 *.pdb
 #src/bin/*.exe

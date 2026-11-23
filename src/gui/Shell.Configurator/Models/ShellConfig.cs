@@ -44,6 +44,7 @@ public sealed class GeneralSettings : ObservableObject
     private bool _removeDuplicates = true;
     private bool _tipsEnabled = true;
     private string _language = "auto";
+    private bool _useLocalization;
     private bool _enablePinUnpinMenu = true;
     private bool _enableMoreOptionsMenu = true;
     private bool _enableThemeImport = true;
@@ -62,6 +63,7 @@ public sealed class GeneralSettings : ObservableObject
     public bool RemoveDuplicates { get => _removeDuplicates; set => SetProperty(ref _removeDuplicates, value); }
     public bool TipsEnabled { get => _tipsEnabled; set => SetProperty(ref _tipsEnabled, value); }
     public string Language { get => _language; set => SetProperty(ref _language, value); }
+    public bool UseLocalization { get => _useLocalization; set => SetProperty(ref _useLocalization, value); }
     public bool EnablePinUnpinMenu { get => _enablePinUnpinMenu; set => SetProperty(ref _enablePinUnpinMenu, value); }
     public bool EnableMoreOptionsMenu { get => _enableMoreOptionsMenu; set => SetProperty(ref _enableMoreOptionsMenu, value); }
     public bool EnableThemeImport { get => _enableThemeImport; set => SetProperty(ref _enableThemeImport, value); }

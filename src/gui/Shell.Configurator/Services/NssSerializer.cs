@@ -29,26 +29,32 @@ public static class NssSerializer
         PropertyNameCaseInsensitive = true
     };
 
+    private static string L(bool useLoc, string locKey, string fallback)
+        => useLoc ? $"loc.{locKey}" : $"\"{EscapeDoubleQuoted(fallback)}\"";
+
     public static Dictionary<string, string> GenerateAllFiles(ShellConfig config)
     {
+        bool useLoc = config.General.UseLocalization;
         var files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["shell.nss"] = GenerateShellNss(config),
+            ["shell.nss"] = GenerateShellNss(config, useLoc),
             [@"imports\theme.nss"] = GenerateThemeNss(config.Theme),
             [@"imports\modify.nss"] = GenerateModifyNss(config.Modify),
             [@"imports\terminal.nss"] = GenerateTerminalNss(config.Terminal),
-            [@"imports\file-manage.nss"] = GenerateFileManageNss(config.FileManage),
-            [@"imports\develop.nss"] = GenerateDevelopNss(config.Develop),
-            [@"imports\goto.nss"] = GenerateGotoNss(config.Goto),
-            [@"imports\taskbar.nss"] = GenerateTaskbarNss(config.Taskbar),
+            [@"imports\file-manage.nss"] = GenerateFileManageNss(config.FileManage, useLoc),
+            [@"imports\develop.nss"] = GenerateDevelopNss(config.Develop, useLoc),
+            [@"imports\goto.nss"] = GenerateGotoNss(config.Goto, useLoc),
+            [@"imports\taskbar.nss"] = GenerateTaskbarNss(config.Taskbar, useLoc),
             [@"imports\user.nss"] = GenerateUserNss(config.CustomItems)
         };
         return files;
     }
 
-    public static string GenerateShellNss(ShellConfig config)
+    public static string GenerateShellNss(ShellConfig config, bool? useLocOverride = null)
     {
         var g = config.General;
+        bool useLoc = useLocOverride ?? g.UseLocalization;
+
         var sb = new StringBuilder();
         sb.AppendLine("settings");
         sb.AppendLine("{");
@@ -60,19 +66,23 @@ public static class NssSerializer
         sb.AppendLine($"\tmodify.remove.duplicate={(g.RemoveDuplicates ? 1 : 0)}");
         sb.AppendLine($"\ttip.enabled={(g.TipsEnabled ? "true" : "false")}");
         sb.AppendLine("}");
-        sb.AppendLine();
-        sb.AppendLine("// localization");
-        sb.AppendLine(@"$loc_path='imports\lang\'");
-        sb.AppendLine("import lang loc_path + \"en.nss\"");
-        if (string.Equals(g.Language, "auto", StringComparison.OrdinalIgnoreCase))
+
+        if (useLoc)
         {
-            sb.AppendLine("import lang if(path.exists(loc_path + sys.lang + \".nss\"),");
-            sb.AppendLine("               loc_path + sys.lang + \".nss\",");
-            sb.AppendLine("               loc_path + \"en.nss\")");
-        }
-        else if (!string.Equals(g.Language, "en", StringComparison.OrdinalIgnoreCase))
-        {
-            sb.AppendLine($"import lang loc_path + \"{EscapeDoubleQuoted(g.Language)}.nss\"");
+            sb.AppendLine();
+            sb.AppendLine("// localization");
+            sb.AppendLine(@"$loc_path='imports\lang\'");
+            sb.AppendLine("import lang loc_path + \"en.nss\"");
+            if (string.Equals(g.Language, "auto", StringComparison.OrdinalIgnoreCase))
+            {
+                sb.AppendLine("import lang if(path.exists(loc_path + sys.lang + \".nss\"),");
+                sb.AppendLine("               loc_path + sys.lang + \".nss\",");
+                sb.AppendLine("               loc_path + \"en.nss\")");
+            }
+            else if (!string.Equals(g.Language, "en", StringComparison.OrdinalIgnoreCase))
+            {
+                sb.AppendLine($"import lang loc_path + \"{EscapeDoubleQuoted(g.Language)}.nss\"");
+            }
         }
 
         sb.AppendLine();
@@ -83,7 +93,7 @@ public static class NssSerializer
         if (g.EnablePinUnpinMenu)
         {
             sb.AppendLine();
-            sb.AppendLine("menu(mode=\"multiple\" title=loc.pin_unpin image=icon.pin)");
+            sb.AppendLine($"menu(mode=\"multiple\" title={L(useLoc, "pin_unpin", "Pin/Unpin")} image=icon.pin)");
             sb.AppendLine("{");
             sb.AppendLine("}");
         }
@@ -153,7 +163,8 @@ public static class NssSerializer
         {
             sb.AppendLine("\tfont");
             sb.AppendLine("\t{");
-            sb.AppendLine($"\t\tname=\"{EscapeDoubleQuoted(t.FontName)}\"");
+            if (!string.IsNullOrWhiteSpace(t.FontName))
+                sb.AppendLine($"\t\tname=\"{EscapeDoubleQuoted(t.FontName)}\"");
             sb.AppendLine($"\t\tsize={t.FontSize}");
             sb.AppendLine("\t}");
         }
@@ -279,10 +290,10 @@ public static class NssSerializer
         return sb.ToString();
     }
 
-    public static string GenerateFileManageNss(FileManageSettings f)
+    public static string GenerateFileManageNss(FileManageSettings f, bool useLoc = false)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("menu(where=sel.count>0 type='file|dir|drive|namespace|back' mode=\"multiple\" title=loc.file_manage image=\\uE253)");
+        sb.AppendLine($"menu(where=sel.count>0 type='file|dir|drive|namespace|back' mode=\"multiple\" title={L(useLoc, "file_manage", "File Manage")} image=\\uE253)");
         sb.AppendLine("{");
 
         if (f.CopyPathMenu)
@@ -290,7 +301,10 @@ public static class NssSerializer
             sb.AppendLine("\tmenu(separator=\"after\" title=title.copy_path image=icon.copy_path)");
             sb.AppendLine("\t{");
             if (f.CopyMultiplePaths)
-                sb.AppendLine("\t\titem(where=sel.count > 1 title=loc.copy_multiple_paths cmd=command.copy(sel(false, \"\\n\")))");
+            {
+                string multiTitle = useLoc ? "loc.copy_multiple_paths" : "'Copy (@sel.count) items selected'";
+                sb.AppendLine($"\t\titem(where=sel.count > 1 title={multiTitle} cmd=command.copy(sel(false, \"\\n\")))");
+            }
             if (f.CopyFullPath)
                 sb.AppendLine("\t\titem(mode=\"single\" title=@sel.path tip=sel.path cmd=command.copy(sel.path))");
             if (f.CopyShortcutTarget)
@@ -316,7 +330,8 @@ public static class NssSerializer
 
         if (f.ChangeExtension)
         {
-            sb.AppendLine("\titem(mode=\"single\" type=\"file\" title=loc.change_extension image=\\uE0B5 cmd=if(input(loc.change_extension, \"Type extension\"),");
+            string extTitle = L(useLoc, "change_extension", "Change extension");
+            sb.AppendLine($"\titem(mode=\"single\" type=\"file\" title={extTitle} image=\\uE0B5 cmd=if(input({extTitle}, \"Type extension\"),");
             sb.AppendLine("\t\tio.rename(sel.path, path.join(sel.dir, sel.file.title + \".\" + input.result))))");
             sb.AppendLine();
         }
@@ -325,57 +340,57 @@ public static class NssSerializer
         {
             sb.AppendLine("\tmenu(separator=\"after\" image=\\uE290 title=title.select)");
             sb.AppendLine("\t{");
-            sb.AppendLine("\t\titem(title=loc.all image=icon.select_all cmd=command.select_all)");
-            sb.AppendLine("\t\titem(title=loc.invert image=icon.invert_selection cmd=command.invert_selection)");
-            sb.AppendLine("\t\titem(title=loc.none image=icon.select_none cmd=command.select_none)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "all", "All")} image=icon.select_all cmd=command.select_all)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "invert", "Invert")} image=icon.invert_selection cmd=command.invert_selection)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "none", "None")} image=icon.select_none cmd=command.select_none)");
             sb.AppendLine("\t}");
             sb.AppendLine();
         }
 
         if (f.TakeOwnership)
         {
-            sb.AppendLine("\titem(type='file|dir|back.dir|drive' title=loc.take_ownership image=[\\uE194,#f00] admin");
+            sb.AppendLine($"\titem(type='file|dir|back.dir|drive' title={L(useLoc, "take_ownership", "Take Ownership")} image=[\\uE194,#f00] admin");
             sb.AppendLine("\t\tcmd args='/K takeown /f \"@sel.path\" @if(sel.type==1,null,\"/r /d y\") && icacls \"@sel.path\" /grant *S-1-5-32-544:F @if(sel.type==1,\"/c /l\",\"/t /c /l /q\")')");
             sb.AppendLine("\tseparator");
         }
 
         if (f.ShowHideMenu)
         {
-            sb.AppendLine("\tmenu(title=loc.show_hide image=icon.show_hidden_files)");
+            sb.AppendLine($"\tmenu(title={L(useLoc, "show_hide", "Show/Hide")} image=icon.show_hidden_files)");
             sb.AppendLine("\t{");
-            sb.AppendLine("\t\titem(title=loc.system_files image=inherit cmd='@command.togglehidden')");
-            sb.AppendLine("\t\titem(title=loc.file_name_extensions image=icon.show_file_extensions cmd='@command.toggleext')");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "system_files", "System files")} image=inherit cmd='@command.togglehidden')");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "file_name_extensions", "File name extensions")} image=icon.show_file_extensions cmd='@command.toggleext')");
             sb.AppendLine("\t}");
             sb.AppendLine();
         }
 
         if (f.AttributesMenu)
         {
-            sb.AppendLine("\tmenu(type='file|dir|back.dir' mode=\"single\" title=loc.attributes image=icon.properties)");
+            sb.AppendLine($"\tmenu(type='file|dir|back.dir' mode=\"single\" title={L(useLoc, "attributes", "Attributes")} image=icon.properties)");
             sb.AppendLine("\t{");
             sb.AppendLine("\t\t$atrr = io.attributes(sel.path)");
-            sb.AppendLine("\t\titem(title=loc.hidden checked=io.attribute.hidden(atrr)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "hidden", "Hidden")} checked=io.attribute.hidden(atrr)");
             sb.AppendLine("\t\t\tcmd args='/c ATTRIB @if(io.attribute.hidden(atrr),\"-\",\"+\")H \"@sel.path\"' window=hidden)");
-            sb.AppendLine("\t\titem(title=loc.system checked=io.attribute.system(atrr)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "system", "System")} checked=io.attribute.system(atrr)");
             sb.AppendLine("\t\t\tcmd args='/c ATTRIB @if(io.attribute.system(atrr),\"-\",\"+\")S \"@sel.path\"' window=hidden)");
-            sb.AppendLine("\t\titem(title=loc.readonly checked=io.attribute.readonly(atrr)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "readonly", "Read-Only")} checked=io.attribute.readonly(atrr)");
             sb.AppendLine("\t\t\tcmd args='/c ATTRIB @if(io.attribute.readonly(atrr),\"-\",\"+\")R \"@sel.path\"' window=hidden)");
-            sb.AppendLine("\t\titem(title=loc.archive checked=io.attribute.archive(atrr)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "archive", "Archive")} checked=io.attribute.archive(atrr)");
             sb.AppendLine("\t\t\tcmd args='/c ATTRIB @if(io.attribute.archive(atrr),\"-\",\"+\")A \"@sel.path\"' window=hidden)");
             sb.AppendLine("\t\tseparator");
-            sb.AppendLine("\t\titem(title=loc.created keys=io.dt.created(sel.path, 'y/m/d') cmd=io.dt.created(sel.path,2000,1,1) vis=label)");
-            sb.AppendLine("\t\titem(title=loc.modified keys=io.dt.modified(sel.path, 'y/m/d') cmd=io.dt.modified(sel.path,2000,1,1) vis=label)");
-            sb.AppendLine("\t\titem(title=loc.accessed keys=io.dt.accessed(sel.path, 'y/m/d') cmd=io.dt.accessed(sel.path,2000,1,1) vis=label)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "created", "Created")} keys=io.dt.created(sel.path, 'y/m/d') cmd=io.dt.created(sel.path,2000,1,1) vis=label)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "modified", "Modified")} keys=io.dt.modified(sel.path, 'y/m/d') cmd=io.dt.modified(sel.path,2000,1,1) vis=label)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "accessed", "Accessed")} keys=io.dt.accessed(sel.path, 'y/m/d') cmd=io.dt.accessed(sel.path,2000,1,1) vis=label)");
             sb.AppendLine("\t}");
             sb.AppendLine();
         }
 
         if (f.RegisterServerMenu)
         {
-            sb.AppendLine("\tmenu(mode=\"single\" type='file' find='.dll|.ocx' separator=\"before\" title=loc.register_server image=\\uea86)");
+            sb.AppendLine($"\tmenu(mode=\"single\" type='file' find='.dll|.ocx' separator=\"before\" title={L(useLoc, "register_server", "Register Server")} image=\\uea86)");
             sb.AppendLine("\t{");
-            sb.AppendLine("\t\titem(title=loc.register admin cmd='regsvr32.exe' args='@sel.path.quote' invoke=\"multiple\")");
-            sb.AppendLine("\t\titem(title=loc.unregister admin cmd='regsvr32.exe' args='/u @sel.path.quote' invoke=\"multiple\")");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "register", "Register")} admin cmd='regsvr32.exe' args='@sel.path.quote' invoke=\"multiple\")");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "unregister", "Unregister")} admin cmd='regsvr32.exe' args='/u @sel.path.quote' invoke=\"multiple\")");
             sb.AppendLine("\t}");
             sb.AppendLine();
         }
@@ -386,15 +401,15 @@ public static class NssSerializer
             sb.AppendLine("\t{");
             if (f.NewFolderMenu)
             {
-                sb.AppendLine("\t\tmenu(separator=\"before\" title=loc.new_folder image=icon.new_folder)");
+                sb.AppendLine($"\t\tmenu(separator=\"before\" title={L(useLoc, "new_folder", "New Folder")} image=icon.new_folder)");
                 sb.AppendLine("\t\t{");
-                sb.AppendLine("\t\t\titem(title=loc.datetime cmd=io.dir.create(sys.datetime(\"ymdHMSs\")))");
-                sb.AppendLine("\t\t\titem(title=loc.guid cmd=io.dir.create(str.guid))");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "datetime", "DateTime")} cmd=io.dir.create(sys.datetime(\"ymdHMSs\")))");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "guid", "Guid")} cmd=io.dir.create(str.guid))");
                 sb.AppendLine("\t\t}");
             }
             if (f.NewFileMenu)
             {
-                sb.AppendLine("\t\tmenu(title=loc.new_file image=icon.new_file)");
+                sb.AppendLine($"\t\tmenu(title={L(useLoc, "new_file", "New File")} image=icon.new_file)");
                 sb.AppendLine("\t\t{");
                 sb.AppendLine("\t\t\t$dt = sys.datetime(\"ymdHMSs\")");
                 sb.AppendLine("\t\t\titem(title='TXT' cmd=io.file.create('@(dt).txt', 'Hello World!'))");
@@ -414,22 +429,22 @@ public static class NssSerializer
         return sb.ToString();
     }
 
-    public static string GenerateDevelopNss(DevelopSettings d)
+    public static string GenerateDevelopNss(DevelopSettings d, bool useLoc = false)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("menu(mode=\"multiple\" title=loc.develop sep=sep.bottom image=\\uE26E)");
+        sb.AppendLine($"menu(mode=\"multiple\" title={L(useLoc, "develop", "&Develop")} sep=sep.bottom image=\\uE26E)");
         sb.AppendLine("{");
 
         if (d.EditorsMenu && (d.VsCode || d.Notepad))
         {
-            sb.AppendLine("\tmenu(mode=\"single\" title=loc.editors image=\\uE17A)");
+            sb.AppendLine($"\tmenu(mode=\"single\" title={L(useLoc, "editors", "editors")} image=\\uE17A)");
             sb.AppendLine("\t{");
             if (d.VsCode)
                 sb.AppendLine("\t\titem(title='Visual Studio Code' image=[\\uE272, #22A7F2] cmd='code' args='\"@sel.path\"')");
             if (d.VsCode && d.Notepad)
                 sb.AppendLine("\t\tseparator");
             if (d.Notepad)
-                sb.AppendLine("\t\titem(type='file' mode=\"single\" title=loc.windows_notepad image cmd='@sys.bin\\notepad.exe' args='\"@sel.path\"')");
+                sb.AppendLine($"\t\titem(type='file' mode=\"single\" title={L(useLoc, "windows_notepad", "Windows notepad")} image cmd='@sys.bin\\notepad.exe' args='\"@sel.path\"')");
             sb.AppendLine("\t}");
             sb.AppendLine();
         }
@@ -491,7 +506,7 @@ public static class NssSerializer
         return sb.ToString();
     }
 
-    public static string GenerateGotoNss(GotoSettings g)
+    public static string GenerateGotoNss(GotoSettings g, bool useLoc = false)
     {
         var sb = new StringBuilder();
         sb.AppendLine("menu(type='*' where=window.is_taskbar||sel.count mode=mode.multiple title=title.go_to sep=sep.both image=\\uE14A)");
@@ -499,7 +514,7 @@ public static class NssSerializer
 
         if (g.FoldersMenu)
         {
-            sb.AppendLine("\tmenu(title=loc.folder image=\\uE1F4)");
+            sb.AppendLine($"\tmenu(title={L(useLoc, "folder", "Folder")} image=\\uE1F4)");
             sb.AppendLine("\t{");
             if (g.FolderWindows) sb.AppendLine("\t\titem(title='Windows' image=inherit cmd=sys.dir)");
             if (g.FolderSystem) sb.AppendLine("\t\titem(title='System' image=inherit cmd=sys.bin)");
@@ -528,7 +543,7 @@ public static class NssSerializer
         if (g.ControlPanel)
             sb.AppendLine("\titem(title=title.control_panel image=\\uE0F3 cmd='shell:::{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}')");
         if (g.AllControlPanelItems)
-            sb.AppendLine("\titem(title=loc.all_control_panel_items image=\\uE0F3 cmd='shell:::{ED7BA470-8E54-465E-825C-99712043E01C}')");
+            sb.AppendLine($"\titem(title={L(useLoc, "all_control_panel_items", "All Control Panel Items")} image=\\uE0F3 cmd='shell:::{{ED7BA470-8E54-465E-825C-99712043E01C}}')");
         if (g.RunDialog)
             sb.AppendLine("\titem(title=title.run image=\\uE14B cmd='shell:::{2559a1f3-21d7-11d4-bdaf-00c04f60b9f0}')");
 
@@ -538,49 +553,49 @@ public static class NssSerializer
             sb.AppendLine("\t{");
             if (g.SettingsSystem)
             {
-                sb.AppendLine("\t\titem(title=loc.system image=inherit cmd='ms-settings:')");
-                sb.AppendLine("\t\titem(title=loc.about image=inherit cmd='ms-settings:about')");
-                sb.AppendLine("\t\titem(title=loc.your_info image=inherit cmd='ms-settings:yourinfo')");
-                sb.AppendLine("\t\titem(title=loc.system_info image=inherit cmd-line='/K systeminfo')");
-                sb.AppendLine("\t\titem(title=loc.search cmd='search-ms:' image=inherit)");
-                sb.AppendLine("\t\titem(title=loc.usb image=inherit cmd='ms-settings:usb')");
+                sb.AppendLine($"\t\titem(title={L(useLoc, "system", "System")} image=inherit cmd='ms-settings:')");
+                sb.AppendLine($"\t\titem(title={L(useLoc, "about", "About")} image=inherit cmd='ms-settings:about')");
+                sb.AppendLine($"\t\titem(title={L(useLoc, "your_info", "Your Info")} image=inherit cmd='ms-settings:yourinfo')");
+                sb.AppendLine($"\t\titem(title={L(useLoc, "system_info", "System Info")} image=inherit cmd-line='/K systeminfo')");
+                sb.AppendLine($"\t\titem(title={L(useLoc, "search", "Search")} cmd='search-ms:' image=inherit)");
+                sb.AppendLine($"\t\titem(title={L(useLoc, "usb", "USB")} image=inherit cmd='ms-settings:usb')");
             }
             if (g.SettingsUpdateDefender)
             {
-                sb.AppendLine("\t\titem(title=loc.windows_update image=inherit cmd='ms-settings:windowsupdate')");
-                sb.AppendLine("\t\titem(title=loc.windows_defender image=inherit cmd='ms-settings:windowsdefender')");
+                sb.AppendLine($"\t\titem(title={L(useLoc, "windows_update", "Windows Update")} image=inherit cmd='ms-settings:windowsupdate')");
+                sb.AppendLine($"\t\titem(title={L(useLoc, "windows_defender", "Windows Defender")} image=inherit cmd='ms-settings:windowsdefender')");
             }
             if (g.SettingsApps)
             {
-                sb.AppendLine("\t\tmenu(title=loc.apps image=inherit)");
+                sb.AppendLine($"\t\tmenu(title={L(useLoc, "apps", "Apps")} image=inherit)");
                 sb.AppendLine("\t\t{");
-                sb.AppendLine("\t\t\titem(title=loc.apps_features image=inherit cmd='ms-settings:appsfeatures')");
-                sb.AppendLine("\t\t\titem(title=loc.default_apps image=inherit cmd='ms-settings:defaultapps')");
-                sb.AppendLine("\t\t\titem(title=loc.optional_features image=inherit cmd='ms-settings:optionalfeatures')");
-                sb.AppendLine("\t\t\titem(title=loc.startup image=inherit cmd='ms-settings:startupapps')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "apps_features", "Apps Features")} image=inherit cmd='ms-settings:appsfeatures')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "default_apps", "Default Apps")} image=inherit cmd='ms-settings:defaultapps')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "optional_features", "Optional Features")} image=inherit cmd='ms-settings:optionalfeatures')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "startup", "Startup")} image=inherit cmd='ms-settings:startupapps')");
                 sb.AppendLine("\t\t}");
             }
             if (g.SettingsPersonalization)
             {
-                sb.AppendLine("\t\tmenu(title=loc.personalization image=inherit)");
+                sb.AppendLine($"\t\tmenu(title={L(useLoc, "personalization", "Personalization")} image=inherit)");
                 sb.AppendLine("\t\t{");
-                sb.AppendLine("\t\t\titem(title=loc.personalization image=inherit cmd='ms-settings:personalization')");
-                sb.AppendLine("\t\t\titem(title=loc.lockscreen image=inherit cmd='ms-settings:lockscreen')");
-                sb.AppendLine("\t\t\titem(title=loc.background image=inherit cmd='ms-settings:personalization-background')");
-                sb.AppendLine("\t\t\titem(title=loc.colors image=inherit cmd='ms-settings:colors')");
-                sb.AppendLine("\t\t\titem(title=loc.themes image=inherit cmd='ms-settings:themes')");
-                sb.AppendLine("\t\t\titem(title=loc.start image=inherit cmd='ms-settings:personalization-start')");
-                sb.AppendLine("\t\t\titem(title=loc.taskbar image=inherit cmd='ms-settings:taskbar')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "personalization", "Personalization")} image=inherit cmd='ms-settings:personalization')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "lockscreen", "Lockscreen")} image=inherit cmd='ms-settings:lockscreen')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "background", "Background")} image=inherit cmd='ms-settings:personalization-background')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "colors", "Colors")} image=inherit cmd='ms-settings:colors')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "themes", "Themes")} image=inherit cmd='ms-settings:themes')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "start", "Start")} image=inherit cmd='ms-settings:personalization-start')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "taskbar", "Taskbar")} image=inherit cmd='ms-settings:taskbar')");
                 sb.AppendLine("\t\t}");
             }
             if (g.SettingsNetwork)
             {
-                sb.AppendLine("\t\tmenu(title=loc.network image=inherit)");
+                sb.AppendLine($"\t\tmenu(title={L(useLoc, "network", "Network")} image=inherit)");
                 sb.AppendLine("\t\t{");
-                sb.AppendLine("\t\t\titem(title=loc.status image=inherit cmd='ms-settings:network-status')");
-                sb.AppendLine("\t\t\titem(title=loc.ethernet image=inherit cmd='ms-settings:network-ethernet')");
-                sb.AppendLine("\t\t\titem(title=loc.wifi image=inherit cmd='ms-settings:network-wifi')");
-                sb.AppendLine("\t\t\titem(title=loc.connections image=inherit cmd='shell:::{7007ACC7-3202-11D1-AAD2-00805FC1270E}')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "status", "Status")} image=inherit cmd='ms-settings:network-status')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "ethernet", "Ethernet")} image=inherit cmd='ms-settings:network-ethernet')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "wifi", "WLAN")} image=inherit cmd='ms-settings:network-wifi')");
+                sb.AppendLine($"\t\t\titem(title={L(useLoc, "connections", "Connections")} image=inherit cmd='shell:::{{7007ACC7-3202-11D1-AAD2-00805FC1270E}}')");
                 sb.AppendLine("\t\t}");
             }
             sb.AppendLine("\t}");
@@ -590,7 +605,7 @@ public static class NssSerializer
         return sb.ToString();
     }
 
-    public static string GenerateTaskbarNss(TaskbarSettings t)
+    public static string GenerateTaskbarNss(TaskbarSettings t, bool useLoc = false)
     {
         var sb = new StringBuilder();
         if (t.ShellAdminMenu)
@@ -613,25 +628,25 @@ public static class NssSerializer
 
         if (t.AppsMenu && (t.AppPaint || t.AppEdge || t.AppCalculator || t.AppRegedit))
         {
-            sb.AppendLine("\tmenu(title=loc.apps image=\\uE254)");
+            sb.AppendLine($"\tmenu(title={L(useLoc, "apps", "Apps")} image=\\uE254)");
             sb.AppendLine("\t{");
-            if (t.AppPaint) sb.AppendLine("\t\titem(title=loc.paint image=\\uE116 cmd='mspaint')");
-            if (t.AppEdge) sb.AppendLine("\t\titem(title=loc.edge image cmd='@sys.prog32\\Microsoft\\Edge\\Application\\msedge.exe')");
-            if (t.AppCalculator) sb.AppendLine("\t\titem(title=loc.calculator image=\\ue1e7 cmd='calc.exe')");
+            if (t.AppPaint) sb.AppendLine($"\t\titem(title={L(useLoc, "paint", "Paint")} image=\\uE116 cmd='mspaint')");
+            if (t.AppEdge) sb.AppendLine($"\t\titem(title={L(useLoc, "edge", "Edge")} image cmd='@sys.prog32\\Microsoft\\Edge\\Application\\msedge.exe')");
+            if (t.AppCalculator) sb.AppendLine($"\t\titem(title={L(useLoc, "calculator", "Calculator")} image=\\ue1e7 cmd='calc.exe')");
             if (t.AppRegedit) sb.AppendLine("\t\titem(title=str.res('regedit.exe,-16') image cmd='regedit.exe')");
             sb.AppendLine("\t}");
         }
 
         if (t.WindowsMenu)
         {
-            sb.AppendLine("\tmenu(title=loc.windows image=\\uE1FB)");
+            sb.AppendLine($"\tmenu(title={L(useLoc, "windows", "Windows")} image=\\uE1FB)");
             sb.AppendLine("\t{");
-            sb.AppendLine("\t\titem(title=loc.cascade_windows cmd=command.cascade_windows)");
-            sb.AppendLine("\t\titem(title=loc.Show_windows_stacked cmd=command.Show_windows_stacked)");
-            sb.AppendLine("\t\titem(title=loc.Show_windows_side_by_side cmd=command.Show_windows_side_by_side)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "cascade_windows", "Cascade windows")} cmd=command.cascade_windows)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "Show_windows_stacked", "Show windows stacked")} cmd=command.Show_windows_stacked)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "Show_windows_side_by_side", "Show windows side by side")} cmd=command.Show_windows_side_by_side)");
             sb.AppendLine("\t\tsep");
-            sb.AppendLine("\t\titem(title=loc.minimize_all_windows cmd=command.minimize_all_windows)");
-            sb.AppendLine("\t\titem(title=loc.restore_all_windows cmd=command.restore_all_windows)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "minimize_all_windows", "Minimize all windows")} cmd=command.minimize_all_windows)");
+            sb.AppendLine($"\t\titem(title={L(useLoc, "restore_all_windows", "Restore all windows")} cmd=command.restore_all_windows)");
             sb.AppendLine("\t}");
         }
 
@@ -640,9 +655,9 @@ public static class NssSerializer
         if (t.WindowsSettings)
             sb.AppendLine("\titem(title=title.settings image=icon.settings(auto, image.color1) cmd='ms-settings:')");
         if (t.TaskManager)
-            sb.AppendLine("\titem(title=loc.task_manager sep=both image=icon.task_manager cmd='taskmgr.exe')");
+            sb.AppendLine($"\titem(title={L(useLoc, "task_manager", "Task Manager")} sep=both image=icon.task_manager cmd='taskmgr.exe')");
         if (t.TaskbarSettingsLink)
-            sb.AppendLine("\titem(title=loc.taskbar_Settings sep=both image=inherit cmd='ms-settings:taskbar')");
+            sb.AppendLine($"\titem(title={L(useLoc, "taskbar_Settings", "Taskbar Settings")} sep=both image=inherit cmd='ms-settings:taskbar')");
         if (t.RestartExplorerOnShift)
             sb.AppendLine("\titem(vis=key.shift() title=title.exit_explorer cmd=command.restart_explorer)");
 
@@ -716,6 +731,8 @@ public static class NssSerializer
 
     public static (ShellConfig Config, bool ImportedFromOriginalNss) LoadFromDirectoryWithMeta(string directory)
     {
+        bool hasLangFolder = File.Exists(Path.Combine(directory, "imports", "lang", "en.nss"));
+
         string sidecarPath = Path.Combine(directory, SidecarFileName);
         if (File.Exists(sidecarPath))
         {
@@ -724,7 +741,12 @@ public static class NssSerializer
                 string json = File.ReadAllText(sidecarPath, Encoding.UTF8);
                 var loaded = JsonSerializer.Deserialize<ShellConfig>(json, JsonOptions);
                 if (loaded != null)
+                {
+                    // Guard against v1.9 installs that don't support `import lang`
+                    if (!hasLangFolder)
+                        loaded.General.UseLocalization = false;
                     return (loaded, false);
+                }
             }
             catch
             {
@@ -734,6 +756,8 @@ public static class NssSerializer
 
         var config = ShellConfig.CreateDefault();
         bool foundNss = ParseExistingNssFiles(directory, config);
+        if (!hasLangFolder)
+            config.General.UseLocalization = false;
         return (config, foundNss);
     }
 
@@ -745,6 +769,10 @@ public static class NssSerializer
         Directory.CreateDirectory(directory);
         string importsDir = Path.Combine(directory, "imports");
         Directory.CreateDirectory(importsDir);
+
+        // Safety guard: never emit `import lang` if imports\lang\en.nss does not exist (v1.9.x compatibility)
+        if (config.General.UseLocalization && !File.Exists(Path.Combine(importsDir, "lang", "en.nss")))
+            config.General.UseLocalization = false;
 
         var generated = GenerateAllFiles(config);
 
@@ -779,6 +807,7 @@ public static class NssSerializer
     private static bool ParseExistingNssFiles(string directory, ShellConfig config)
     {
         bool parsedAny = false;
+        bool hasLangFiles = File.Exists(Path.Combine(directory, "imports", "lang", "en.nss"));
 
         string shellPath = Path.Combine(directory, "shell.nss");
         if (File.Exists(shellPath))
@@ -790,9 +819,11 @@ public static class NssSerializer
             config.General.ShowDelay = MatchInt(active, @"showdelay\s*=\s*(\d+)", config.General.ShowDelay);
             config.General.ExcludeNonExplorer = Regex.IsMatch(active, @"exclude\.where\s*=\s*!process\.is_explorer", RegexOptions.IgnoreCase);
             config.General.RemoveDuplicates = MatchInt(active, @"modify\.remove\.duplicate\s*=\s*(\d+)", 1) != 0;
-            config.General.TipsEnabled = !Regex.IsMatch(active, @"tip\.enabled\s*=\s*false", RegexOptions.IgnoreCase);
+            config.General.TipsEnabled = !Regex.IsMatch(active, @"tip\.enabled\s*=\s*(false|0)", RegexOptions.IgnoreCase);
 
-            // Detect explicit language override if not using sys.lang auto-detection
+            // Only enable `import lang` if the existing config uses it AND lang files exist
+            config.General.UseLocalization = hasLangFiles && Regex.IsMatch(active, @"\bimport\s+lang\b", RegexOptions.IgnoreCase);
+
             if (!active.Contains("sys.lang", StringComparison.OrdinalIgnoreCase))
             {
                 var langMatches = Regex.Matches(active, @"import\s+lang\s+.*?[""']([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)\.nss[""']", RegexOptions.IgnoreCase);
@@ -813,10 +844,9 @@ public static class NssSerializer
             config.General.EnableGotoImport = IsImportEnabled(active, "imports/goto.nss");
             config.General.EnableTaskbarImport = IsImportEnabled(active, "imports/taskbar.nss");
             config.General.EnableCustomImport = IsImportEnabled(active, "imports/user.nss");
-            config.General.EnablePinUnpinMenu = active.Contains("pin_unpin", StringComparison.OrdinalIgnoreCase) || active.Contains("Pin/Unpin", StringComparison.OrdinalIgnoreCase);
-            config.General.EnableMoreOptionsMenu = active.Contains("more_options", StringComparison.OrdinalIgnoreCase);
+            config.General.EnablePinUnpinMenu = ContainsAny(active, "pin_unpin", "Pin/Unpin");
+            config.General.EnableMoreOptionsMenu = ContainsAny(active, "more_options");
 
-            // Preserve any extra custom imports from user's original shell.nss
             foreach (Match m in Regex.Matches(active, @"^\s*import\s+['""]([^'""]+\.nss)['""]", RegexOptions.Multiline | RegexOptions.IgnoreCase))
             {
                 string imp = m.Groups[1].Value.Replace('\\', '/');
@@ -837,8 +867,16 @@ public static class NssSerializer
             var viewMatch = Regex.Match(active, @"\bview\s*=\s*(?:view\.)?(auto|compact|small|medium|large|wide)", RegexOptions.IgnoreCase);
             if (viewMatch.Success) config.Theme.View = viewMatch.Groups[1].Value.ToLowerInvariant();
 
-            var darkMatch = Regex.Match(active, @"\bdark\s*=\s*(auto|true|false|default)", RegexOptions.IgnoreCase);
-            if (darkMatch.Success) config.Theme.DarkMode = darkMatch.Groups[1].Value.ToLowerInvariant() == "default" ? "auto" : darkMatch.Groups[1].Value.ToLowerInvariant();
+            var darkMatch = Regex.Match(active, @"\bdark\s*=\s*(auto|true|false|default|0|1)", RegexOptions.IgnoreCase);
+            if (darkMatch.Success)
+            {
+                config.Theme.DarkMode = darkMatch.Groups[1].Value.ToLowerInvariant() switch
+                {
+                    "1" or "true" => "true",
+                    "0" or "false" => "false",
+                    _ => "auto"
+                };
+            }
 
             string bgBlock = ExtractBlock(active, "background");
             if (!string.IsNullOrEmpty(bgBlock))
@@ -880,7 +918,7 @@ public static class NssSerializer
             string borderBlock = ExtractBlock(active, "border");
             if (!string.IsNullOrEmpty(borderBlock))
             {
-                config.Theme.BorderEnabled = !Regex.IsMatch(borderBlock, @"\benabled\s*=\s*false", RegexOptions.IgnoreCase);
+                config.Theme.BorderEnabled = !Regex.IsMatch(borderBlock, @"\benabled\s*=\s*(false|0)", RegexOptions.IgnoreCase);
                 config.Theme.BorderSize = MatchInt(borderBlock, @"\bsize\s*=\s*(\d+)", config.Theme.BorderSize);
                 config.Theme.BorderRadius = MatchInt(borderBlock, @"\bradius\s*=\s*(\d+)", config.Theme.BorderRadius);
             }
@@ -888,7 +926,7 @@ public static class NssSerializer
             string shadowBlock = ExtractBlock(active, "shadow");
             if (!string.IsNullOrEmpty(shadowBlock))
             {
-                config.Theme.ShadowEnabled = !Regex.IsMatch(shadowBlock, @"\benabled\s*=\s*false", RegexOptions.IgnoreCase);
+                config.Theme.ShadowEnabled = !Regex.IsMatch(shadowBlock, @"\benabled\s*=\s*(false|0)", RegexOptions.IgnoreCase);
                 config.Theme.ShadowSize = MatchInt(shadowBlock, @"\bsize\s*=\s*(\d+)", config.Theme.ShadowSize);
                 config.Theme.ShadowOpacity = MatchInt(shadowBlock, @"\bopacity\s*=\s*(\d+)", config.Theme.ShadowOpacity);
             }
@@ -900,6 +938,11 @@ public static class NssSerializer
                 var fnMatch = Regex.Match(fontBlock, @"\bname\s*=\s*[""']([^""']+)[""']");
                 if (fnMatch.Success) config.Theme.FontName = fnMatch.Groups[1].Value;
                 config.Theme.FontSize = MatchInt(fontBlock, @"\bsize\s*=\s*(\d+)", config.Theme.FontSize);
+            }
+            else if (Regex.IsMatch(active, @"\bfont\.size\s*=\s*(\d+)", RegexOptions.IgnoreCase))
+            {
+                config.Theme.UseCustomFont = true;
+                config.Theme.FontSize = MatchInt(active, @"\bfont\.size\s*=\s*(\d+)", config.Theme.FontSize);
             }
 
             config.Theme.ImageAlign = MatchInt(active, @"image\.align\s*=\s*(\d+)", config.Theme.ImageAlign);
@@ -917,7 +960,7 @@ public static class NssSerializer
             m.GroupPinUnpin = ContainsToken(active, "Pin/Unpin");
             m.MoveCopyAsPathToFileManage = ContainsToken(active, "id.copy_as_path");
             m.MoveCustomizeFolderToFileManage = ContainsToken(active, "id.customize_this_folder");
-            m.MoveTerminalItemsToTerminal = ContainsToken(active, "open_powershell_window_here") || ContainsToken(active, "open in terminal");
+            m.MoveTerminalItemsToTerminal = ContainsAny(active, "open_powershell_window_here", "open in terminal");
 
             m.MoreSendTo = ContainsToken(active, "id.send_to");
             m.MoreShare = ContainsToken(active, "id.share");
@@ -940,9 +983,9 @@ public static class NssSerializer
             parsedAny = true;
             string active = StripComments(File.ReadAllText(termPath));
             config.Terminal.EnableAdminModifier = ContainsToken(active, "has_admin");
-            config.Terminal.CommandPrompt = ContainsToken(active, "command_prompt") || ContainsToken(active, "cmd-prompt");
-            config.Terminal.WindowsPowerShell = ContainsToken(active, "windows_powershell") || ContainsToken(active, "cmd-ps");
-            config.Terminal.WindowsTerminal = ContainsToken(active, "WindowsTerminal") || ContainsToken(active, "wt.exe");
+            config.Terminal.CommandPrompt = ContainsAny(active, "command_prompt", "cmd-prompt");
+            config.Terminal.WindowsPowerShell = ContainsAny(active, "windows_powershell", "cmd-ps");
+            config.Terminal.WindowsTerminal = ContainsAny(active, "WindowsTerminal", "wt.exe");
         }
 
         string fmPath = Path.Combine(directory, "imports", "file-manage.nss");
@@ -952,21 +995,21 @@ public static class NssSerializer
             string active = StripComments(File.ReadAllText(fmPath));
             var f = config.FileManage;
             f.CopyPathMenu = ContainsToken(active, "copy_path");
-            f.CopyMultiplePaths = ContainsToken(active, "copy_multiple_paths");
+            f.CopyMultiplePaths = ContainsAny(active, "copy_multiple_paths", "items selected");
             f.CopyFullPath = ContainsToken(active, "command.copy(sel.path)");
-            f.CopyShortcutTarget = ContainsToken(active, "sel.lnk");
+            f.CopyShortcutTarget = ContainsAny(active, "sel.lnk", "'.lnk'");
             f.CopyParentPath = ContainsToken(active, "sel.parent");
             f.CopyFileName = ContainsToken(active, "sel.file.name");
             f.CopyFileTitle = ContainsToken(active, "sel.file.title");
             f.CopyFileExtension = ContainsToken(active, "sel.file.ext");
-            f.ChangeExtension = ContainsToken(active, "change_extension");
-            f.SelectMenu = ContainsToken(active, "title.select");
-            f.TakeOwnership = ContainsToken(active, "take_ownership");
-            f.ShowHideMenu = ContainsToken(active, "show_hide");
-            f.AttributesMenu = ContainsToken(active, "loc.attributes");
-            f.RegisterServerMenu = ContainsToken(active, "register_server");
-            f.NewFolderMenu = ContainsToken(active, "new_folder");
-            f.NewFileMenu = ContainsToken(active, "new_file");
+            f.ChangeExtension = ContainsAny(active, "change_extension", "Change extension");
+            f.SelectMenu = ContainsAny(active, "title.select", "command.select_all");
+            f.TakeOwnership = ContainsAny(active, "take_ownership", "Take Ownership", "takeown");
+            f.ShowHideMenu = ContainsAny(active, "show_hide", "Show/Hide", "togglehidden");
+            f.AttributesMenu = ContainsAny(active, "loc.attributes", "'Attributes'", "\"Attributes\"", "io.attributes");
+            f.RegisterServerMenu = ContainsAny(active, "register_server", "Register Server", "regsvr32");
+            f.NewFolderMenu = ContainsAny(active, "new_folder", "New Folder", "io.dir.create");
+            f.NewFileMenu = ContainsAny(active, "new_file", "New File", "io.file.create");
             f.FolderOptions = ContainsToken(active, "folder_options");
         }
 
@@ -976,15 +1019,15 @@ public static class NssSerializer
             parsedAny = true;
             string active = StripComments(File.ReadAllText(devPath));
             var d = config.Develop;
-            d.EditorsMenu = ContainsToken(active, "loc.editors");
+            d.EditorsMenu = ContainsAny(active, "loc.editors", "'editors'", "\"editors\"");
             d.VsCode = ContainsToken(active, "Visual Studio Code");
-            d.Notepad = ContainsToken(active, "windows_notepad") || ContainsToken(active, "notepad.exe");
-            d.DotnetMenu = ContainsToken(active, "'dotnet'") || ContainsToken(active, "\"dotnet\"");
+            d.Notepad = ContainsAny(active, "windows_notepad", "notepad.exe");
+            d.DotnetMenu = ContainsAny(active, "'dotnet'", "\"dotnet\"");
             d.DotnetRunWatchClean = ContainsToken(active, "dotnet run");
             d.DotnetBuild = ContainsToken(active, "dotnet build");
             d.DotnetPublish = ContainsToken(active, "dotnet publish");
             d.DotnetEf = ContainsToken(active, "dotnet ef");
-            d.DotnetHelpInfo = ContainsToken(active, "dotnet -h") || ContainsToken(active, "dotnet --info");
+            d.DotnetHelpInfo = ContainsAny(active, "dotnet -h", "dotnet --info");
 
             d.Reshack = ContainsToken(active, "reshack");
             d.Peview = ContainsToken(active, "peview");
@@ -1001,7 +1044,7 @@ public static class NssSerializer
             parsedAny = true;
             string active = StripComments(File.ReadAllText(gotoPath));
             var g = config.Goto;
-            g.FoldersMenu = ContainsToken(active, "loc.folder");
+            g.FoldersMenu = ContainsAny(active, "loc.folder", "'Folder'", "\"Folder\"");
             g.FolderWindows = ContainsToken(active, "cmd=sys.dir");
             g.FolderSystem = ContainsToken(active, "cmd=sys.bin");
             g.FolderProgramFiles = ContainsToken(active, "cmd=sys.prog)");
@@ -1019,7 +1062,7 @@ public static class NssSerializer
             g.FolderTemp = ContainsToken(active, "cmd=user.temp");
 
             g.ControlPanel = ContainsToken(active, "control_panel");
-            g.AllControlPanelItems = ContainsToken(active, "all_control_panel_items");
+            g.AllControlPanelItems = ContainsAny(active, "all_control_panel_items", "All Control Panel Items");
             g.RunDialog = ContainsToken(active, "title.run");
 
             g.WindowsSettingsMenu = ContainsToken(active, "title.settings");
@@ -1038,14 +1081,14 @@ public static class NssSerializer
             var tb = config.Taskbar;
             tb.ShellAdminMenu = ContainsToken(active, "title=app.name");
             tb.IncludeConfiguratorShortcut = ContainsToken(active, "ShellConfigurator.exe");
-            tb.AppsMenu = ContainsToken(active, "loc.apps");
+            tb.AppsMenu = ContainsAny(active, "loc.apps", "'Apps'", "\"Apps\"", "mspaint");
             tb.AppPaint = ContainsToken(active, "mspaint");
             tb.AppEdge = ContainsToken(active, "msedge.exe");
             tb.AppCalculator = ContainsToken(active, "calc.exe");
             tb.AppRegedit = ContainsToken(active, "regedit.exe");
-            tb.WindowsMenu = ContainsToken(active, "loc.windows");
+            tb.WindowsMenu = ContainsAny(active, "loc.windows", "cascade_windows");
             tb.ShowDesktop = ContainsToken(active, "toggle_desktop");
-            tb.WindowsSettings = ContainsToken(active, "ms-settings:");
+            tb.WindowsSettings = ContainsAny(active, "cmd='ms-settings:'", "cmd=\"ms-settings:\"");
             tb.TaskManager = ContainsToken(active, "taskmgr.exe");
             tb.TaskbarSettingsLink = ContainsToken(active, "ms-settings:taskbar");
             tb.RestartExplorerOnShift = ContainsToken(active, "restart_explorer");
@@ -1112,7 +1155,6 @@ public static class NssSerializer
 
     private static string StripComments(string text)
     {
-        // Remove /* ... */ block comments first, then line comments outside quotes
         string noBlock = Regex.Replace(text, @"/\*[\s\S]*?\*/", "");
         var sb = new StringBuilder(noBlock.Length);
         foreach (string line in noBlock.Split('\n'))
@@ -1138,6 +1180,9 @@ public static class NssSerializer
 
     private static bool ContainsToken(string text, string token)
         => text.Contains(token, StringComparison.OrdinalIgnoreCase);
+
+    private static bool ContainsAny(string text, params string[] tokens)
+        => tokens.Any(t => text.Contains(t, StringComparison.OrdinalIgnoreCase));
 
     private static bool IsImportEnabled(string text, string importTarget)
     {

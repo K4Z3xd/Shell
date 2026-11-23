@@ -43,5 +43,6 @@ src/gui/**/bin/
 src/gui/**/obj/
 src/bin/backups/
 src/bin/shell.configurator.json
+dist/
 *.pdb
 #src/bin/*.exe

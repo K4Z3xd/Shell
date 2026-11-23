@@ -14,44 +14,39 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _viewModel = new MainViewModel();
-        _viewModel.AppThemeChanged += OnAppThemeChanged;
         DataContext = _viewModel;
 
-        SourceInitialized += (_, _) => ApplyWindowAcrylic(_viewModel.IsDarkAppTheme);
+        SourceInitialized += (_, _) => AcrylicHelper.ApplyAcrylic(this, isDark: true);
+        Loaded += (_, _) => AcrylicHelper.ApplyAcrylic(this, isDark: true);
         StateChanged += OnWindowStateChanged;
-    }
-
-    private void OnAppThemeChanged(object? sender, bool isDark)
-    {
-        App.ApplyPalette(isDark);
-        ApplyWindowAcrylic(isDark);
-    }
-
-    private void ApplyWindowAcrylic(bool isDark)
-    {
-        AcrylicHelper.ApplyAcrylic(this, isDark);
     }
 
     private void NavCategory_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button { Tag: string key })
-        {
             _viewModel.SelectCategory(key);
-        }
     }
 
-    private void BrowseFolder_Click(object sender, RoutedEventArgs e)
+    private void BrowseImportFolder_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "Select Nilesoft Shell Directory (containing shell.nss)",
-            InitialDirectory = _viewModel.ShellDirectory
+            Title = "Select Existing Nilesoft Shell Config Folder",
+            InitialDirectory = _viewModel.ImportFolderPath
         };
-
         if (dialog.ShowDialog(this) == true && !string.IsNullOrWhiteSpace(dialog.FolderName))
+            _viewModel.ImportFolderPath = dialog.FolderName;
+    }
+
+    private void BrowseFreshFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFolderDialog
         {
-            _viewModel.ShellDirectory = dialog.FolderName;
-        }
+            Title = "Select Destination Folder for Fresh Config",
+            InitialDirectory = _viewModel.FreshFolderPath
+        };
+        if (dialog.ShowDialog(this) == true && !string.IsNullOrWhiteSpace(dialog.FolderName))
+            _viewModel.FreshFolderPath = dialog.FolderName;
     }
 
     private void Minimize_Click(object sender, RoutedEventArgs e)

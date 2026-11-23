@@ -34,52 +34,62 @@ public sealed class RelayCommand : ICommand
 public sealed class NavCategory : ObservableObject
 {
     private bool _isSelected;
-    private string _badge = "";
+    private bool _isDisabled;
 
     public required string Key { get; init; }
     public required string Title { get; init; }
     public required string Glyph { get; init; }
-    public required string Description { get; init; }
 
     public bool IsSelected { get => _isSelected; set => SetProperty(ref _isSelected, value); }
-    public string Badge { get => _badge; set => SetProperty(ref _badge, value); }
+    public bool IsDisabled { get => _isDisabled; set => SetProperty(ref _isDisabled, value); }
 }
 
 public sealed class MainViewModel : ObservableObject
 {
     private ShellConfig _config = ShellConfig.CreateDefault();
     private string _shellDirectory;
-    private string _selectedPage = "General";
+    private string _selectedPage = "Settings";
     private bool _hasUnsavedChanges;
-    private bool _isDarkAppTheme = true;
     private string _statusMessage = "Ready";
     private string _selectedPreviewFile = "shell.nss";
     private string _previewContent = "";
     private CustomMenuItem? _selectedCustomItem;
-    private string _searchQuery = "";
+
+    // Portable Setup / Import state
+    private bool _isSetupVisible;
+    private bool _canCancelSetup;
+    private string _importFolderPath = "";
+    private bool _copyAppToImportFolder;
+    private string _freshFolderPath = "";
+    private bool _freshCopyBinaries = true;
+    private bool _freshRegisterShell;
 
     public MainViewModel()
     {
-        _shellDirectory = ShellService.DetectShellDirectory();
+        var resolution = ShellService.ResolveStartupDirectory();
+        _shellDirectory = resolution.Directory;
+        _isSetupVisible = resolution.NeedsSetup;
+        _canCancelSetup = !resolution.NeedsSetup;
+        _importFolderPath = ShellService.DetectSuggestedDirectory();
+        _freshFolderPath = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
         Categories = new ObservableCollection<NavCategory>
         {
-            new() { Key = "General", Title = "General & Modules", Glyph = "\uE713", Description = "Global shell behavior, language, and master category toggles", IsSelected = true },
-            new() { Key = "Theme", Title = "Theme & Acrylic", Glyph = "\uE790", Description = "Context menu appearance, backdrop effect, borders, and shadow" },
-            new() { Key = "Modify", Title = "System Items", Glyph = "\uE70F", Description = "Remove clutter or group built-in Windows context menu entries" },
-            new() { Key = "Terminal", Title = "Terminal", Glyph = "\uE756", Description = "Command Prompt, PowerShell, and Windows Terminal shortcuts" },
-            new() { Key = "FileManage", Title = "File Manage", Glyph = "\uE8B7", Description = "Copy Path, Attributes, Ownership, New File/Folder, and Register Server" },
-            new() { Key = "Develop", Title = "Develop", Glyph = "\uE943", Description = "Editors, dotnet CLI workflows, and external developer tools" },
-            new() { Key = "Goto", Title = "Go To", Glyph = "\uE72A", Description = "Quick folder navigation, Control Panel, Run, and Windows Settings" },
-            new() { Key = "Taskbar", Title = "Taskbar", Glyph = "\uE75B", Description = "Taskbar quick apps, window layouts, and Shell admin menu" },
-            new() { Key = "Custom", Title = "Custom Items", Glyph = "\uE710", Description = "Create your own context menu items saved to imports/user.nss" },
-            new() { Key = "Preview", Title = "NSS Preview & Tools", Glyph = "\uE943", Description = "Inspect generated .nss files and manage Nilesoft Shell service" }
+            new() { Key = "Settings", Title = "Settings", Glyph = "\uE713", IsSelected = true },
+            new() { Key = "Theme", Title = "Theme", Glyph = "\uE790" },
+            new() { Key = "Modify", Title = "Modify", Glyph = "\uE70F" },
+            new() { Key = "Terminal", Title = "Terminal", Glyph = "\uE756" },
+            new() { Key = "FileManage", Title = "File Manage", Glyph = "\uE8B7" },
+            new() { Key = "Develop", Title = "Develop", Glyph = "\uE943" },
+            new() { Key = "Goto", Title = "Go To", Glyph = "\uE72A" },
+            new() { Key = "Taskbar", Title = "Taskbar", Glyph = "\uE75B" },
+            new() { Key = "Custom", Title = "Custom", Glyph = "\uE710" },
+            new() { Key = "Script", Title = "Script", Glyph = "\uE8A5" }
         };
 
         SaveCommand = new RelayCommand(SaveConfiguration);
         ReloadCommand = new RelayCommand(LoadConfiguration);
         ResetDefaultsCommand = new RelayCommand(ResetDefaults);
-        ToggleAppThemeCommand = new RelayCommand(ToggleAppTheme);
         AddCustomItemCommand = new RelayCommand(AddCustomItem);
         DuplicateCustomItemCommand = new RelayCommand(DuplicateCustomItem, () => SelectedCustomItem != null);
         RemoveCustomItemCommand = new RelayCommand(RemoveCustomItem, () => SelectedCustomItem != null);
@@ -88,7 +98,15 @@ public sealed class MainViewModel : ObservableObject
         RestartExplorerCommand = new RelayCommand(RestartExplorer);
         OpenFolderCommand = new RelayCommand(() => ShellService.OpenFolder(ShellDirectory));
 
-        LoadConfiguration();
+        OpenSetupCommand = new RelayCommand(OpenSetup);
+        CancelSetupCommand = new RelayCommand(() => IsSetupVisible = false, () => CanCancelSetup);
+        CompleteImportCommand = new RelayCommand(CompleteImport);
+        CompleteFreshSetupCommand = new RelayCommand(CompleteFreshSetup);
+
+        if (!_isSetupVisible)
+            LoadConfiguration();
+        else
+            RefreshModuleStatesAndPreview();
     }
 
     public ObservableCollection<NavCategory> Categories { get; }
@@ -101,7 +119,7 @@ public sealed class MainViewModel : ObservableObject
     public string[] ThemeNames { get; } = ["modern", "classic", "black", "white", "auto"];
     public string[] DarkModeOptions { get; } = ["auto", "true", "false"];
     public string[] ViewOptions { get; } = ["auto", "compact", "small", "medium", "large", "wide"];
-    public string[] EffectOptions { get; } = ["acrylic", "blur", "transparent", "none", "auto"];
+    public string[] EffectOptions { get; } = ["auto", "acrylic", "blur", "transparent", "none"];
     public string[] ContextTypeOptions { get; } = ["*", "file", "dir", "file|dir", "back", "dir.back", "drive", "taskbar", "desktop"];
     public string[] SeparatorOptions { get; } = ["none", "top", "bottom", "both"];
 
@@ -128,7 +146,8 @@ public sealed class MainViewModel : ObservableObject
             {
                 AttachListeners(_config);
                 OnPropertyChanged(nameof(HasCustomItems));
-                RefreshBadgesAndPreview();
+                OnPropertyChanged(nameof(PreservedImportsSummary));
+                RefreshModuleStatesAndPreview();
             }
         }
     }
@@ -149,6 +168,10 @@ public sealed class MainViewModel : ObservableObject
     public bool HasShellExecutable => ShellService.HasShellBinary(ShellDirectory);
     public bool HasCustomItems => Config.CustomItems.Count > 0;
 
+    public string PreservedImportsSummary => Config.General.PreservedCustomImports.Count > 0
+        ? $"Preserving {Config.General.PreservedCustomImports.Count} custom import(s): {string.Join(", ", Config.General.PreservedCustomImports)}"
+        : string.Empty;
+
     public string SelectedPage
     {
         get => _selectedPage;
@@ -159,7 +182,7 @@ public sealed class MainViewModel : ObservableObject
                 foreach (var c in Categories)
                     c.IsSelected = string.Equals(c.Key, value, StringComparison.OrdinalIgnoreCase);
 
-                if (value == "Preview")
+                if (value == "Script")
                     RefreshPreviewText();
             }
         }
@@ -170,23 +193,6 @@ public sealed class MainViewModel : ObservableObject
         get => _hasUnsavedChanges;
         private set => SetProperty(ref _hasUnsavedChanges, value);
     }
-
-    public bool IsDarkAppTheme
-    {
-        get => _isDarkAppTheme;
-        set
-        {
-            if (SetProperty(ref _isDarkAppTheme, value))
-            {
-                OnPropertyChanged(nameof(AppThemeLabel));
-                OnPropertyChanged(nameof(AppThemeGlyph));
-                AppThemeChanged?.Invoke(this, value);
-            }
-        }
-    }
-
-    public string AppThemeLabel => IsDarkAppTheme ? "Dark Acrylic" : "Light Acrylic";
-    public string AppThemeGlyph => IsDarkAppTheme ? "\uE708" : "\uE706";
 
     public string StatusMessage
     {
@@ -223,28 +229,56 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
-    public string SearchQuery
+    // Setup / Portable Import Properties
+    public bool IsSetupVisible
     {
-        get => _searchQuery;
+        get => _isSetupVisible;
+        set => SetProperty(ref _isSetupVisible, value);
+    }
+
+    public bool CanCancelSetup
+    {
+        get => _canCancelSetup;
         set
         {
-            if (SetProperty(ref _searchQuery, value) && !string.IsNullOrWhiteSpace(value))
-            {
-                var match = Categories.FirstOrDefault(c =>
-                    c.Title.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                    c.Description.Contains(value, StringComparison.OrdinalIgnoreCase));
-                if (match != null)
-                    SelectedPage = match.Key;
-            }
+            if (SetProperty(ref _canCancelSetup, value))
+                CancelSetupCommand.RaiseCanExecuteChanged();
         }
     }
 
-    public event EventHandler<bool>? AppThemeChanged;
+    public string ImportFolderPath
+    {
+        get => _importFolderPath;
+        set => SetProperty(ref _importFolderPath, value);
+    }
+
+    public bool CopyAppToImportFolder
+    {
+        get => _copyAppToImportFolder;
+        set => SetProperty(ref _copyAppToImportFolder, value);
+    }
+
+    public string FreshFolderPath
+    {
+        get => _freshFolderPath;
+        set => SetProperty(ref _freshFolderPath, value);
+    }
+
+    public bool FreshCopyBinaries
+    {
+        get => _freshCopyBinaries;
+        set => SetProperty(ref _freshCopyBinaries, value);
+    }
+
+    public bool FreshRegisterShell
+    {
+        get => _freshRegisterShell;
+        set => SetProperty(ref _freshRegisterShell, value);
+    }
 
     public RelayCommand SaveCommand { get; }
     public RelayCommand ReloadCommand { get; }
     public RelayCommand ResetDefaultsCommand { get; }
-    public RelayCommand ToggleAppThemeCommand { get; }
     public RelayCommand AddCustomItemCommand { get; }
     public RelayCommand DuplicateCustomItemCommand { get; }
     public RelayCommand RemoveCustomItemCommand { get; }
@@ -253,23 +287,106 @@ public sealed class MainViewModel : ObservableObject
     public RelayCommand RestartExplorerCommand { get; }
     public RelayCommand OpenFolderCommand { get; }
 
+    public RelayCommand OpenSetupCommand { get; }
+    public RelayCommand CancelSetupCommand { get; }
+    public RelayCommand CompleteImportCommand { get; }
+    public RelayCommand CompleteFreshSetupCommand { get; }
+
     public void SelectCategory(string key) => SelectedPage = key;
+
+    private void OpenSetup()
+    {
+        ImportFolderPath = ShellDirectory;
+        FreshFolderPath = ShellDirectory;
+        CanCancelSetup = true;
+        IsSetupVisible = true;
+    }
+
+    private void CompleteImport()
+    {
+        string folder = ImportFolderPath.Trim();
+        if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+        {
+            MessageBox.Show("Please select an existing folder containing your Nilesoft Shell config (shell.nss).",
+                "Folder Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (!File.Exists(Path.Combine(folder, "shell.nss")))
+        {
+            var confirm = MessageBox.Show(
+                $"No shell.nss file was found in:\n{folder}\n\nOpen this folder anyway with default settings?",
+                "shell.nss Not Found", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (confirm != MessageBoxResult.Yes) return;
+        }
+
+        string copyNote = "";
+        if (CopyAppToImportFolder)
+        {
+            var (ok, msg) = ShellService.CopyPortableAppIntoFolder(folder);
+            copyNote = ok ? " — portable files copied into folder" : $" ({msg})";
+        }
+
+        ShellService.SavePortablePointer(folder);
+        _shellDirectory = folder;
+        OnPropertyChanged(nameof(ShellDirectory));
+        OnPropertyChanged(nameof(HasShellExecutable));
+
+        LoadConfiguration();
+        CanCancelSetup = true;
+        IsSetupVisible = false;
+        StatusMessage = $"Imported config from {folder}{copyNote}";
+    }
+
+    private void CompleteFreshSetup()
+    {
+        string folder = FreshFolderPath.Trim();
+        if (string.IsNullOrWhiteSpace(folder))
+        {
+            MessageBox.Show("Please choose a destination folder for the fresh configuration.",
+                "Select Folder", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (File.Exists(Path.Combine(folder, "shell.nss")))
+        {
+            var overwrite = MessageBox.Show(
+                $"A shell.nss file already exists in:\n{folder}\n\nOverwrite it with a fresh default configuration?",
+                "Confirm Overwrite", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (overwrite != MessageBoxResult.Yes) return;
+        }
+
+        var (ok, msg) = ShellService.InitializeFreshConfig(folder, FreshCopyBinaries, FreshRegisterShell);
+        if (!ok)
+        {
+            MessageBox.Show(msg, "Setup Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        _shellDirectory = folder;
+        OnPropertyChanged(nameof(ShellDirectory));
+        OnPropertyChanged(nameof(HasShellExecutable));
+        LoadConfiguration();
+        CanCancelSetup = true;
+        IsSetupVisible = false;
+        StatusMessage = msg;
+    }
 
     public void LoadConfiguration()
     {
         try
         {
-            Config = NssSerializer.LoadFromDirectory(ShellDirectory);
+            var (loaded, importedOriginal) = NssSerializer.LoadFromDirectoryWithMeta(ShellDirectory);
+            Config = loaded;
             SelectedCustomItem = Config.CustomItems.FirstOrDefault();
             HasUnsavedChanges = false;
-            bool exists = File.Exists(Path.Combine(ShellDirectory, "shell.nss"));
-            StatusMessage = exists
-                ? $"Loaded configuration from {ShellDirectory}"
-                : $"No shell.nss found in {ShellDirectory} — using defaults (Save will generate files)";
+            StatusMessage = importedOriginal
+                ? $"Loaded existing Nilesoft Shell config from {ShellDirectory}"
+                : $"Loaded {ShellDirectory}";
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error loading configuration: {ex.Message}";
+            StatusMessage = $"Load error: {ex.Message}";
         }
     }
 
@@ -280,13 +397,13 @@ public sealed class MainViewModel : ObservableObject
             NssSerializer.SaveToDirectory(ShellDirectory, Config, createBackup: true);
             HasUnsavedChanges = false;
             RefreshPreviewText();
-            StatusMessage = $"Saved shell.nss & imports to {ShellDirectory} (hold Ctrl + Right-Click in Explorer to reload)";
+            StatusMessage = "Saved. Hold Ctrl + Right-Click in Explorer to reload immediately.";
         }
         catch (Exception ex)
         {
             StatusMessage = $"Save failed: {ex.Message}";
             MessageBox.Show(
-                $"Failed to write configuration files to:\n{ShellDirectory}\n\n{ex.Message}\n\nIf Nilesoft Shell is installed in Program Files, try running ShellConfigurator as Administrator.",
+                $"Failed to write files to:\n{ShellDirectory}\n\n{ex.Message}\n\nRun as Administrator if saving into Program Files.",
                 "Save Failed",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -296,8 +413,8 @@ public sealed class MainViewModel : ObservableObject
     private void ResetDefaults()
     {
         var result = MessageBox.Show(
-            "Reset all context menu categories, theme settings, and options back to Nilesoft Shell defaults?",
-            "Reset to Defaults",
+            "Reset all options back to Nilesoft Shell defaults?",
+            "Reset Defaults",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
@@ -307,10 +424,8 @@ public sealed class MainViewModel : ObservableObject
         Config = ShellConfig.CreateDefault();
         SelectedCustomItem = null;
         HasUnsavedChanges = true;
-        StatusMessage = "Defaults restored — click Save Configuration to apply.";
+        StatusMessage = "Defaults restored — click Save to apply.";
     }
-
-    private void ToggleAppTheme() => IsDarkAppTheme = !IsDarkAppTheme;
 
     private void AddCustomItem()
     {
@@ -368,13 +483,13 @@ public sealed class MainViewModel : ObservableObject
         var (ok, msg) = ShellService.RunShellExe(ShellDirectory, args, requireAdmin: true);
         StatusMessage = msg;
         if (!ok)
-            MessageBox.Show(msg, "Shell Service", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(msg, "Nilesoft Shell", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void RestartExplorer()
     {
         var confirm = MessageBox.Show(
-            "Restart Windows Explorer now to reload Nilesoft Shell?",
+            "Restart Windows Explorer to reload Nilesoft Shell?",
             "Restart Explorer",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
@@ -418,64 +533,20 @@ public sealed class MainViewModel : ObservableObject
     {
         HasUnsavedChanges = true;
         OnPropertyChanged(nameof(HasCustomItems));
-        RefreshBadgesAndPreview();
+        RefreshModuleStatesAndPreview();
     }
 
-    private void RefreshBadgesAndPreview()
+    private void RefreshModuleStatesAndPreview()
     {
-        SetBadge("General", CountTrue(
-            Config.General.EnableThemeImport, Config.General.EnableImagesImport, Config.General.EnableModifyImport,
-            Config.General.EnableTerminalImport, Config.General.EnableFileManageImport, Config.General.EnableDevelopImport,
-            Config.General.EnableGotoImport, Config.General.EnableTaskbarImport) + "/8");
+        SetDisabled("Theme", !Config.General.EnableThemeImport);
+        SetDisabled("Modify", !Config.General.EnableModifyImport);
+        SetDisabled("Terminal", !Config.General.EnableTerminalImport);
+        SetDisabled("FileManage", !Config.General.EnableFileManageImport);
+        SetDisabled("Develop", !Config.General.EnableDevelopImport);
+        SetDisabled("Goto", !Config.General.EnableGotoImport);
+        SetDisabled("Taskbar", !Config.General.EnableTaskbarImport);
 
-        SetBadge("Theme", Config.Theme.BackgroundEffect);
-
-        SetBadge("Modify", Config.General.EnableModifyImport
-            ? CountTrue(
-                Config.Modify.RemoveRestorePreviousVersions, Config.Modify.RemoveCastToDevice, Config.Modify.PromoteEmptyRecycleBin,
-                Config.Modify.GroupPinUnpin, Config.Modify.MoveCopyAsPathToFileManage, Config.Modify.MoveCustomizeFolderToFileManage,
-                Config.Modify.MoveTerminalItemsToTerminal, Config.Modify.MoreSendTo, Config.Modify.MoreShare,
-                Config.Modify.MoreCreateShortcut, Config.Modify.MoreSetDesktopBackground, Config.Modify.MoreRotateLeft,
-                Config.Modify.MoreRotateRight, Config.Modify.MoreMapNetworkDrive, Config.Modify.MoreDisconnectNetworkDrive,
-                Config.Modify.MoreFormat, Config.Modify.MoreEject, Config.Modify.MoreGiveAccessTo,
-                Config.Modify.MoreIncludeInLibrary, Config.Modify.MorePrint) + "/20"
-            : "OFF");
-
-        SetBadge("Terminal", Config.General.EnableTerminalImport
-            ? CountTrue(Config.Terminal.CommandPrompt, Config.Terminal.WindowsPowerShell, Config.Terminal.WindowsTerminal) + "/3"
-            : "OFF");
-
-        SetBadge("FileManage", Config.General.EnableFileManageImport
-            ? CountTrue(
-                Config.FileManage.CopyPathMenu, Config.FileManage.ChangeExtension, Config.FileManage.SelectMenu,
-                Config.FileManage.TakeOwnership, Config.FileManage.ShowHideMenu, Config.FileManage.AttributesMenu,
-                Config.FileManage.RegisterServerMenu, Config.FileManage.NewFolderMenu, Config.FileManage.NewFileMenu,
-                Config.FileManage.FolderOptions) + "/10"
-            : "OFF");
-
-        SetBadge("Develop", Config.General.EnableDevelopImport
-            ? CountTrue(
-                Config.Develop.EditorsMenu, Config.Develop.DotnetMenu,
-                Config.Develop.Reshack, Config.Develop.Peview, Config.Develop.WebServer) + "/5"
-            : "OFF");
-
-        SetBadge("Goto", Config.General.EnableGotoImport
-            ? CountTrue(
-                Config.Goto.FoldersMenu, Config.Goto.ControlPanel, Config.Goto.AllControlPanelItems,
-                Config.Goto.RunDialog, Config.Goto.WindowsSettingsMenu) + "/5"
-            : "OFF");
-
-        SetBadge("Taskbar", Config.General.EnableTaskbarImport
-            ? CountTrue(
-                Config.Taskbar.ShellAdminMenu, Config.Taskbar.AppsMenu, Config.Taskbar.WindowsMenu,
-                Config.Taskbar.ShowDesktop, Config.Taskbar.WindowsSettings, Config.Taskbar.TaskManager,
-                Config.Taskbar.TaskbarSettingsLink, Config.Taskbar.RestartExplorerOnShift) + "/8"
-            : "OFF");
-
-        SetBadge("Custom", Config.CustomItems.Count(i => i.Enabled).ToString());
-        SetBadge("Preview", "NSS");
-
-        if (SelectedPage == "Preview")
+        if (SelectedPage == "Script")
             RefreshPreviewText();
     }
 
@@ -487,11 +558,9 @@ public sealed class MainViewModel : ObservableObject
             : string.Empty;
     }
 
-    private void SetBadge(string key, string value)
+    private void SetDisabled(string key, bool disabled)
     {
         var cat = Categories.FirstOrDefault(c => c.Key == key);
-        if (cat != null) cat.Badge = value;
+        if (cat != null) cat.IsDisabled = disabled;
     }
-
-    private static int CountTrue(params bool[] values) => values.Count(v => v);
 }

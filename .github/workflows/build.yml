@@ -58,6 +58,15 @@ jobs:
         -p:DebugType=None
         -o "${{env.BIN_PATH}}"
 
+    - name: Package Portable ZIP
+      shell: pwsh
+      run: |
+        $stage = "${{runner.temp}}\shell-portable-${{matrix.platform}}"
+        New-Item -ItemType Directory -Path $stage -Force | Out-Null
+        Copy-Item "${{env.BIN_PATH}}\shell.exe", "${{env.BIN_PATH}}\shell.dll", "${{env.BIN_PATH}}\ShellConfigurator.exe", "${{env.BIN_PATH}}\shell.nss", "${{env.BIN_PATH}}\license.txt", "${{env.BIN_PATH}}\readme.txt" -Destination $stage -ErrorAction SilentlyContinue
+        Copy-Item "${{env.BIN_PATH}}\imports" -Destination "$stage\imports" -Recurse -Force
+        Compress-Archive -Path "$stage\*" -DestinationPath "${{env.BIN_PATH}}\shell-portable-${{matrix.platform}}.zip" -Force
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:

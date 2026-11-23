@@ -73,6 +73,7 @@ public sealed class GeneralSettings : ObservableObject
     public bool EnableGotoImport { get => _enableGotoImport; set => SetProperty(ref _enableGotoImport, value); }
     public bool EnableTaskbarImport { get => _enableTaskbarImport; set => SetProperty(ref _enableTaskbarImport, value); }
     public bool EnableCustomImport { get => _enableCustomImport; set => SetProperty(ref _enableCustomImport, value); }
+    public List<string> PreservedCustomImports { get; set; } = new();
 }
 
 public sealed class ThemeSettings : ObservableObject
@@ -83,7 +84,7 @@ public sealed class ThemeSettings : ObservableObject
     private string _backgroundColor = "auto";
     private bool _useAutoOpacity = true;
     private int _backgroundOpacity = 85;
-    private string _backgroundEffect = "acrylic";
+    private string _backgroundEffect = "auto";
     private bool _borderEnabled = true;
     private int _borderSize = 1;
     private int _borderRadius = 2;

@@ -6,17 +6,20 @@ namespace Shell.Configurator.Interop;
 
 public static class AcrylicHelper
 {
+    private const int GWL_STYLE = -16;
+    private const int WS_SYSMENU = 0x00080000;
+
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_FRAMECHANGED = 0x0020;
+
     private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
     private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
     private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
 
     private const int DWMWCP_ROUND = 2;
-
-    public const int DWMSBT_AUTO = 0;
-    public const int DWMSBT_NONE = 1;
-    public const int DWMSBT_MAINWINDOW = 2;      // Mica
-    public const int DWMSBT_TRANSIENTWINDOW = 3; // Acrylic
-    public const int DWMSBT_TABBEDWINDOW = 4;    // Tabbed Mica
+    private const int DWMSBT_TRANSIENTWINDOW = 3; // Acrylic
 
     [StructLayout(LayoutKind.Sequential)]
     private struct MARGINS
@@ -59,6 +62,15 @@ public static class AcrylicHelper
         public int SizeOfData;
     }
 
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
@@ -68,18 +80,26 @@ public static class AcrylicHelper
     [DllImport("user32.dll")]
     private static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
 
-    public static void ApplyAcrylic(Window window, bool isDark)
+    public static void ApplyAcrylic(Window window, bool isDark = true)
     {
         var helper = new WindowInteropHelper(window);
         IntPtr hwnd = helper.Handle;
         if (hwnd == IntPtr.Zero)
             return;
 
+        // Remove WS_SYSMENU so Windows 11 DWM never renders ghost native caption buttons behind our custom titlebar buttons
+        int style = GetWindowLong(hwnd, GWL_STYLE);
+        if ((style & WS_SYSMENU) != 0)
+        {
+            SetWindowLong(hwnd, GWL_STYLE, style & ~WS_SYSMENU);
+            SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+        }
+
         // Extend DWM glass frame across the full client area for seamless Acrylic
         var margins = new MARGINS { Left = -1, Right = -1, Top = -1, Bottom = -1 };
         _ = DwmExtendFrameIntoClientArea(hwnd, ref margins);
 
-        // Dark or light immersive caption/backdrop hint
+        // Dark immersive backdrop hint
         int darkValue = isDark ? 1 : 0;
         _ = DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkValue, sizeof(int));
 
@@ -87,7 +107,7 @@ public static class AcrylicHelper
         int cornerPref = DWMWCP_ROUND;
         _ = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref cornerPref, sizeof(int));
 
-        // Windows 11 22H2+ (build 22621+) native DWM Acrylic backdrop
+        // Windows 11 22H2+ native DWM Acrylic backdrop
         var osVersion = Environment.OSVersion.Version;
         if (osVersion.Major >= 10 && osVersion.Build >= 22621)
         {
@@ -97,15 +117,13 @@ public static class AcrylicHelper
                 return;
         }
 
-        // Fallback for Windows 10 / Windows 11 21H2 via SetWindowCompositionAttribute
-        ApplyLegacyAcrylic(hwnd, isDark);
+        // Fallback for Windows 10 / Windows 11 21H2
+        ApplyLegacyAcrylic(hwnd);
     }
 
-    private static void ApplyLegacyAcrylic(IntPtr hwnd, bool isDark)
+    private static void ApplyLegacyAcrylic(IntPtr hwnd)
     {
-        // Format: 0xAABBGGRR
-        uint tintColor = isDark ? 0xB8201914u : 0xCCF5F3F0u;
-
+        uint tintColor = 0xBA1B1411u; // Dark Acrylic tint (0xAABBGGRR)
         var accent = new AccentPolicy
         {
             AccentState = AccentState.ACCENT_ENABLE_ACRYLICBLURBEHIND,

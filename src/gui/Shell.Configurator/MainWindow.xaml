@@ -2,12 +2,14 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ctrl="clr-namespace:Shell.Configurator.Controls"
-        Title="Nilesoft Shell Configurator"
-        Width="1120" Height="740"
-        MinWidth="900" MinHeight="600"
+        Title="Nilesoft Shell"
+        Width="980" Height="680"
+        MinWidth="820" MinHeight="540"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanResize"
         Background="Transparent"
-        Foreground="{DynamicResource TextPrimaryBrush}"
+        Foreground="{StaticResource TextPrimaryBrush}"
         FontFamily="{StaticResource AppFont}"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True"
@@ -15,114 +17,42 @@
         TextOptions.TextRenderingMode="ClearType">
 
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="44"
-                      CornerRadius="10"
+        <WindowChrome CaptionHeight="38"
                       GlassFrameThickness="-1"
                       ResizeBorderThickness="6"
                       UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
 
-    <!-- Root Translucent Acrylic Tint Overlay -->
-    <Border x:Name="RootBorder" Background="{DynamicResource WindowTintBrush}">
+    <Border x:Name="RootBorder" Background="{StaticResource WindowTintBrush}">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="44"/>
+                <RowDefinition Height="38"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="56"/>
             </Grid.RowDefinitions>
 
-            <!-- Custom Acrylic TitleBar -->
+            <!-- Minimal Clean Title Bar: App Icon + Name on Left, 3 Windows Buttons on Right -->
             <Border Grid.Row="0"
-                    Background="{DynamicResource TitleBarBrush}"
-                    BorderBrush="{DynamicResource BorderBrushSubtle}"
+                    Background="{StaticResource TitleBarBrush}"
+                    BorderBrush="{StaticResource DividerBrush}"
                     BorderThickness="0,0,0,1">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- App Identity -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
-                        <Border Width="24" Height="24" CornerRadius="6" Background="{DynamicResource AccentSoftBrush}" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
+                        <Border Width="20" Height="20" CornerRadius="5" Background="{StaticResource AccentSoftBrush}" Margin="0,0,9,0">
                             <TextBlock Text="&#xE756;"
                                        FontFamily="{StaticResource IconFont}"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource AccentBrush}"
+                                       FontSize="11"
+                                       Foreground="{StaticResource AccentBrush}"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="Nilesoft Shell Configurator"
-                                   FontSize="13.5"
+                        <TextBlock Text="Nilesoft Shell"
+                                   FontSize="12.5"
                                    FontWeight="SemiBold"
                                    VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextPrimaryBrush}"/>
-                        <Border Margin="10,0,0,0"
-                                Padding="7,2"
-                                CornerRadius="4"
-                                Background="{DynamicResource AccentSoftBrush}"
-                                VerticalAlignment="Center">
-                            <TextBlock Text="ACRYLIC"
-                                       FontSize="10"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource AccentBrush}"/>
-                        </Border>
+                                   Foreground="{StaticResource TextPrimaryBrush}"/>
                     </StackPanel>
 
-                    <!-- Shell Directory Quick Selector -->
-                    <StackPanel Grid.Column="1"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                WindowChrome.IsHitTestVisibleInChrome="True">
-                        <Border Background="{DynamicResource SubCardBrush}"
-                                BorderBrush="{DynamicResource BorderBrushSubtle}"
-                                BorderThickness="1"
-                                CornerRadius="6"
-                                Padding="10,4">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="&#xE8B7;"
-                                           FontFamily="{StaticResource IconFont}"
-                                           FontSize="12"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,7,0"/>
-                                <TextBlock Text="{Binding ShellDirectory}"
-                                           MaxWidth="360"
-                                           TextTrimming="CharacterEllipsis"
-                                           FontSize="12"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           VerticalAlignment="Center"
-                                           ToolTip="{Binding ShellDirectory}"/>
-                                <Button Content="Browse"
-                                        Click="BrowseFolder_Click"
-                                        Margin="10,0,0,0"
-                                        Padding="8,2"
-                                        FontSize="11.5"
-                                        Style="{StaticResource AcrylicSecondaryButtonStyle}"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-
-                    <!-- Theme Switch & Window Captions -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Command="{Binding ToggleAppThemeCommand}"
-                                WindowChrome.IsHitTestVisibleInChrome="True"
-                                Margin="0,0,8,0"
-                                Padding="10,4"
-                                Style="{StaticResource AcrylicSecondaryButtonStyle}"
-                                ToolTip="Switch between Dark Acrylic and Light Acrylic">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding AppThemeGlyph}"
-                                           FontFamily="{StaticResource IconFont}"
-                                           FontSize="12"
-                                           VerticalAlignment="Center"
-                                           Margin="0,0,6,0"/>
-                                <TextBlock Text="{Binding AppThemeLabel}" FontSize="11.5" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Stretch">
                         <Button Content="&#xE921;" Style="{StaticResource CaptionButtonStyle}" Click="Minimize_Click" ToolTip="Minimize"/>
                         <Button x:Name="MaxRestoreBtn" Content="&#xE922;" Style="{StaticResource CaptionButtonStyle}" Click="MaxRestore_Click" ToolTip="Maximize"/>
                         <Button Content="&#xE8BB;" Style="{StaticResource CloseCaptionButtonStyle}" Click="Close_Click" ToolTip="Close"/>
@@ -130,133 +60,96 @@
                 </Grid>
             </Border>
 
-            <!-- Main Workspace: Navigation Rail + Category Content -->
-            <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="252"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <!-- ==================== MAIN APP SHELL ==================== -->
+            <Grid Grid.Row="1" Visibility="{Binding IsSetupVisible, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
 
-                <!-- Left Acrylic Sidebar -->
-                <Border Grid.Column="0"
-                        Background="{DynamicResource SidebarBrush}"
-                        BorderBrush="{DynamicResource BorderBrushSubtle}"
-                        BorderThickness="0,0,1,0"
-                        Padding="12,14">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="196"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                        <!-- Quick Search Box -->
-                        <Grid Grid.Row="0" Margin="0,0,0,12">
-                            <TextBox Style="{StaticResource AcrylicTextBoxStyle}"
-                                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="30,7,10,7"
-                                     ToolTip="Jump to a context menu category"/>
-                            <TextBlock Text="&#xE721;"
-                                       FontFamily="{StaticResource IconFont}"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource TextMutedBrush}"
-                                       IsHitTestVisible="False"
-                                       VerticalAlignment="Center"
-                                       Margin="10,0,0,0"/>
-                            <TextBlock Text="Jump to category..."
-                                       FontSize="12.5"
-                                       Foreground="{DynamicResource TextMutedBrush}"
-                                       IsHitTestVisible="False"
-                                       VerticalAlignment="Center"
-                                       Margin="30,0,0,0">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SearchQuery}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
-
-                        <!-- Category List -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <!-- Clean Left Sidebar -->
+                    <Border Grid.Column="0"
+                            Background="{StaticResource SidebarBrush}"
+                            BorderBrush="{StaticResource DividerBrush}"
+                            BorderThickness="0,0,1,0"
+                            Padding="10,12">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding Categories}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Button Tag="{Binding Key}"
                                                 Click="NavCategory_Click"
                                                 Cursor="Hand"
-                                                Margin="0,0,0,4"
+                                                Margin="0,0,0,3"
                                                 HorizontalContentAlignment="Stretch"
                                                 Background="Transparent"
                                                 BorderThickness="0">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
                                                     <Border x:Name="NavBd"
-                                                            CornerRadius="8"
-                                                            Padding="10,9"
-                                                            Background="Transparent"
-                                                            BorderThickness="1"
-                                                            BorderBrush="Transparent">
+                                                            CornerRadius="6"
+                                                            Padding="9,8"
+                                                            Background="Transparent">
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="4"/>
-                                                                <ColumnDefinition Width="28"/>
+                                                                <ColumnDefinition Width="26"/>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
 
                                                             <Border x:Name="Indicator"
                                                                     Grid.Column="0"
-                                                                    Width="3" Height="16"
-                                                                    CornerRadius="2"
-                                                                    Background="{DynamicResource AccentBrush}"
+                                                                    Width="3" Height="15"
+                                                                    CornerRadius="1.5"
+                                                                    Background="{StaticResource AccentBrush}"
                                                                     Visibility="Collapsed"
                                                                     HorizontalAlignment="Left"
                                                                     VerticalAlignment="Center"/>
 
-                                                            <TextBlock Grid.Column="1"
+                                                            <TextBlock x:Name="NavGlyph"
+                                                                       Grid.Column="1"
                                                                        Text="{Binding Glyph}"
                                                                        FontFamily="{StaticResource IconFont}"
-                                                                       FontSize="14"
-                                                                       Foreground="{DynamicResource TextSecondaryBrush}"
-                                                                       x:Name="NavGlyph"
+                                                                       FontSize="13.5"
+                                                                       Foreground="{StaticResource TextSecondaryBrush}"
                                                                        HorizontalAlignment="Center"
                                                                        VerticalAlignment="Center"/>
 
-                                                            <TextBlock Grid.Column="2"
+                                                            <TextBlock x:Name="NavLabel"
+                                                                       Grid.Column="2"
                                                                        Text="{Binding Title}"
                                                                        FontSize="13"
-                                                                       FontWeight="Medium"
-                                                                       Foreground="{DynamicResource TextPrimaryBrush}"
+                                                                       Foreground="{StaticResource TextPrimaryBrush}"
                                                                        VerticalAlignment="Center"
-                                                                       Margin="4,0,6,0"/>
+                                                                       Margin="4,0,4,0"/>
 
-                                                            <Border Grid.Column="3"
-                                                                    Padding="6,2"
-                                                                    CornerRadius="5"
-                                                                    Background="{DynamicResource SubCardBrush}"
-                                                                    VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding Badge}"
-                                                                           FontSize="10.5"
-                                                                           FontWeight="SemiBold"
-                                                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                                            </Border>
+                                                            <TextBlock Grid.Column="3"
+                                                                       Text="Off"
+                                                                       FontSize="10.5"
+                                                                       Foreground="{StaticResource TextMutedBrush}"
+                                                                       VerticalAlignment="Center"
+                                                                       Visibility="{Binding IsDisabled, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                                         </Grid>
                                                     </Border>
                                                     <ControlTemplate.Triggers>
                                                         <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="NavBd" Property="Background" Value="{DynamicResource CardBrush}"/>
+                                                            <Setter TargetName="NavBd" Property="Background" Value="{StaticResource CardBrush}"/>
                                                         </Trigger>
                                                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                            <Setter TargetName="NavBd" Property="Background" Value="{DynamicResource CardHoverBrush}"/>
-                                                            <Setter TargetName="NavBd" Property="BorderBrush" Value="{DynamicResource BorderBrushSubtle}"/>
+                                                            <Setter TargetName="NavBd" Property="Background" Value="{StaticResource CardHoverBrush}"/>
                                                             <Setter TargetName="Indicator" Property="Visibility" Value="Visible"/>
-                                                            <Setter TargetName="NavGlyph" Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                                            <Setter TargetName="NavGlyph" Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                                                            <Setter TargetName="NavLabel" Property="FontWeight" Value="SemiBold"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                                                            <Setter TargetName="NavLabel" Property="Opacity" Value="0.55"/>
                                                         </DataTrigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>
@@ -266,864 +159,763 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
+                    </Border>
 
-                        <!-- Tip Box at Bottom of Sidebar -->
-                        <Border Grid.Row="2"
-                                Margin="0,10,0,0"
-                                Padding="11,9"
-                                CornerRadius="8"
-                                Background="{DynamicResource AccentSoftBrush}"
-                                BorderBrush="{DynamicResource BorderBrushSubtle}"
-                                BorderThickness="1">
-                            <StackPanel>
-                                <TextBlock Text="Instant Reload Tip"
-                                           FontSize="11.5"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource AccentBrush}"/>
-                                <TextBlock Text="Hold Ctrl + Right-Click in File Explorer after saving to reload Nilesoft Shell immediately."
-                                           FontSize="11"
-                                           TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextSecondaryBrush}"
-                                           Margin="0,3,0,0"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-                </Border>
+                    <!-- Clean Content Pane -->
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="24,18,24,18">
+                        <Grid MaxWidth="740" HorizontalAlignment="Stretch">
 
-                <!-- Right Main Content Area -->
-                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="26,20,26,20">
-                    <Grid MaxWidth="820" HorizontalAlignment="Stretch">
+                            <!-- ==================== SETTINGS ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Settings}">
+                                <TextBlock Text="Settings" Style="{StaticResource PageTitleStyle}"/>
+                                <TextBlock Text="Config folder, portable mode, shell registration, and global shell.nss options."
+                                           Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,8"/>
 
-                        <!-- ==================== PAGE 1: GENERAL & MODULES ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=General}">
-                            <TextBlock Text="General &amp; Context Modules" Style="{StaticResource PageTitleStyle}"/>
-                            <TextBlock Text="Control global shell.nss settings, localization, and enable or disable entire context menu categories."
-                                       Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,18"/>
-
-                            <TextBlock Text="Global Behavior" Style="{StaticResource SectionHeadingStyle}"/>
-                            <Border Style="{StaticResource AcrylicCardStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="20"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="14"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <StackPanel Grid.Row="0" Grid.Column="0">
-                                        <TextBlock Text="Menu Show Delay (ms)" Style="{StaticResource SettingLabelStyle}"/>
-                                        <TextBlock Text="Delay before submenus expand (0 - 4000 ms)" Style="{StaticResource SettingDescStyle}"/>
-                                        <Grid Margin="0,8,0,0">
+                                <TextBlock Text="Portable &amp; Config Location" Style="{StaticResource SectionHeadingStyle}"/>
+                                <Border Style="{StaticResource AcrylicGroupStyle}">
+                                    <StackPanel>
+                                        <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="52"/>
+                                                <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <Slider Minimum="0" Maximum="1000" TickFrequency="50" IsSnapToTickEnabled="True"
-                                                    Value="{Binding Config.General.ShowDelay}" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Config.General.ShowDelay, StringFormat={}{0} ms}"
-                                                       HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                       FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"/>
+                                            <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                                <TextBlock Text="Active Folder" Style="{StaticResource SettingLabelStyle}"/>
+                                                <TextBlock Text="{Binding ShellDirectory}" Style="{StaticResource SettingDescStyle}" TextTrimming="CharacterEllipsis" ToolTip="{Binding ShellDirectory}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Button Content="Open Folder" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding OpenFolderCommand}" Margin="0,0,6,0"/>
+                                                <Button Content="Import / Setup" Style="{StaticResource AcrylicPrimaryButtonStyle}" Command="{Binding OpenSetupCommand}"/>
+                                            </StackPanel>
                                         </Grid>
-                                    </StackPanel>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="2">
-                                        <TextBlock Text="Menu Localization" Style="{StaticResource SettingLabelStyle}"/>
-                                        <TextBlock Text="Language pack loaded from imports/lang/" Style="{StaticResource SettingDescStyle}"/>
-                                        <ComboBox Style="{StaticResource AcrylicComboBoxStyle}"
-                                                  Margin="0,8,0,0"
-                                                  ItemsSource="{Binding AvailableLanguages}"
-                                                  SelectedItem="{Binding Config.General.Language}"/>
-                                    </StackPanel>
+                                        <TextBlock Text="{Binding PreservedImportsSummary}"
+                                                   FontSize="11.5"
+                                                   Foreground="{StaticResource AccentBrush}"
+                                                   Margin="0,8,0,0"
+                                                   Visibility="{Binding PreservedImportsSummary, Converter={StaticResource NullToCollapsedConverter}}"/>
 
-                                    <StackPanel Grid.Row="2" Grid.Column="0">
-                                        <TextBlock Text="Hook Priority" Style="{StaticResource SettingLabelStyle}"/>
-                                        <TextBlock Text="Execution priority for shell hooks (default: 1)" Style="{StaticResource SettingDescStyle}"/>
-                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,8,0,0" Width="100" HorizontalAlignment="Left"
-                                                 Text="{Binding Config.General.Priority, UpdateSourceTrigger=PropertyChanged}"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                                        <Border Style="{StaticResource RowDividerStyle}" Margin="0,12,0,10"/>
 
-                            <ctrl:ToggleSettingCard Glyph="&#xE770;" Title="Explorer Only (Exclude Other Processes)"
-                                                    Description="Sets exclude.where = !process.is_explorer so custom menus only affect File Explorer."
-                                                    IsChecked="{Binding Config.General.ExcludeNonExplorer}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE8C8;" Title="Remove Duplicate Entries"
-                                                    Description="Automatically hides duplicated items when modifying system context menus."
-                                                    IsChecked="{Binding Config.General.RemoveDuplicates}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE946;" Title="Enable Tooltips"
-                                                    Description="Display helpful hover tooltips on menu entries (e.g., Shift for Admin)."
-                                                    IsChecked="{Binding Config.General.TipsEnabled}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE718;" Title="Pin / Unpin Submenu Container"
-                                                    Description="Expose the top-level Pin/Unpin submenu group inside shell.nss."
-                                                    IsChecked="{Binding Config.General.EnablePinUnpinMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE712;" Title="More Options Submenu Container"
-                                                    Description="Expose the top-level More options submenu used to keep secondary items tidy."
-                                                    IsChecked="{Binding Config.General.EnableMoreOptionsMenu}"/>
-
-                            <TextBlock Text="Active Context Categories (imports/*.nss)" Style="{StaticResource SectionHeadingStyle}" Margin="0,12,0,8"/>
-                            <UniformGrid Columns="2">
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Glyph="&#xE790;" Title="Theme (theme.nss)" Description="Custom menu visual style &amp; backdrop" IsChecked="{Binding Config.General.EnableThemeImport}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Glyph="&#xEB9F;" Title="SVG Icons (images.nss)" Description="Built-in vector icon definitions" IsChecked="{Binding Config.General.EnableImagesImport}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Glyph="&#xE70F;" Title="Modify System (modify.nss)" Description="Hide or reorganize native Windows entries" IsChecked="{Binding Config.General.EnableModifyImport}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Glyph="&#xE756;" Title="Terminal (terminal.nss)" Description="CMD, PowerShell, and Windows Terminal" IsChecked="{Binding Config.General.EnableTerminalImport}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Glyph="&#xE8B7;" Title="File Manage (file-manage.nss)" Description="Copy path, attributes, ownership, new items" IsChecked="{Binding Config.General.EnableFileManageImport}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Glyph="&#xE943;" Title="Develop (develop.nss)" Description="VS Code, Notepad, dotnet CLI, dev tools" IsChecked="{Binding Config.General.EnableDevelopImport}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Glyph="&#xE72A;" Title="Go To (goto.nss)" Description="Quick folders, Control Panel, Settings" IsChecked="{Binding Config.General.EnableGotoImport}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Glyph="&#xE75B;" Title="Taskbar (taskbar.nss)" Description="Taskbar apps, window layouts, Shell menu" IsChecked="{Binding Config.General.EnableTaskbarImport}"/>
-                            </UniformGrid>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 2: THEME & ACRYLIC ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Theme}">
-                            <TextBlock Text="Theme &amp; Context Menu Acrylic" Style="{StaticResource PageTitleStyle}"/>
-                            <TextBlock Text="Customize imports/theme.nss — configure Acrylic backdrop, color scheme, spacing, borders, shadow, and typography."
-                                       Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,18"/>
-
-                            <!-- Live Visual Context Menu Preview -->
-                            <Border Style="{StaticResource AcrylicCardStyle}" Padding="18">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="260"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
-                                        <TextBlock Text="Live Context Menu Preview" Style="{StaticResource SectionHeadingStyle}"/>
-                                        <TextBlock Text="Adjusting Theme Preset, Backdrop Effect, Dark Mode, Border Radius, and Categories updates your generated imports/theme.nss automatically."
-                                                   Style="{StaticResource SettingDescStyle}"/>
-                                        <WrapPanel Margin="0,12,0,0">
-                                            <Border Background="{DynamicResource AccentSoftBrush}" CornerRadius="6" Padding="9,4" Margin="0,0,8,6">
-                                                <TextBlock Text="{Binding Config.Theme.Name, StringFormat=Preset: {0}}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"/>
-                                            </Border>
-                                            <Border Background="{DynamicResource SubCardBrush}" CornerRadius="6" Padding="9,4" Margin="0,0,8,6">
-                                                <TextBlock Text="{Binding Config.Theme.BackgroundEffect, StringFormat=Effect: {0}}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                            </Border>
-                                            <Border Background="{DynamicResource SubCardBrush}" CornerRadius="6" Padding="9,4" Margin="0,0,8,6">
-                                                <TextBlock Text="{Binding Config.Theme.View, StringFormat=View: {0}}" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                            </Border>
+                                        <WrapPanel>
+                                            <Button Content="Register Shell" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding RegisterShellCommand}" IsEnabled="{Binding HasShellExecutable}" Margin="0,0,8,0"/>
+                                            <Button Content="Unregister Shell" Style="{StaticResource AcrylicDangerButtonStyle}" Command="{Binding UnregisterShellCommand}" IsEnabled="{Binding HasShellExecutable}" Margin="0,0,8,0"/>
+                                            <Button Content="Restart Explorer" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding RestartExplorerCommand}"/>
                                         </WrapPanel>
                                     </StackPanel>
+                                </Border>
 
-                                    <!-- Simulated Acrylic Context Menu Card -->
-                                    <Border Grid.Column="1"
-                                            Background="#B81B2230"
-                                            BorderBrush="#3CFFFFFF"
-                                            BorderThickness="1"
-                                            CornerRadius="10"
-                                            Padding="6">
-                                        <Border.Effect>
-                                            <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.45" Color="#000000"/>
-                                        </Border.Effect>
-                                        <StackPanel>
-                                            <Border CornerRadius="6" Padding="10,7" Background="#2E4CC2FF">
-                                                <Grid>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="&#xE756;" FontFamily="{StaticResource IconFont}" Foreground="#4CC2FF" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="Terminal" Foreground="#F4F7FB" FontSize="12.5" FontWeight="Medium"/>
-                                                    </StackPanel>
-                                                    <TextBlock Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="10" Foreground="#A6B2C6" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                </Grid>
-                                            </Border>
-                                            <Border CornerRadius="6" Padding="10,7" Visibility="{Binding Config.General.EnableFileManageImport, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                <Grid>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="&#xE8B7;" FontFamily="{StaticResource IconFont}" Foreground="#A6B2C6" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="File manage" Foreground="#F4F7FB" FontSize="12.5"/>
-                                                    </StackPanel>
-                                                    <TextBlock Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="10" Foreground="#A6B2C6" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                </Grid>
-                                            </Border>
-                                            <Border CornerRadius="6" Padding="10,7" Visibility="{Binding Config.General.EnableDevelopImport, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                <Grid>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="&#xE943;" FontFamily="{StaticResource IconFont}" Foreground="#A6B2C6" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="Develop" Foreground="#F4F7FB" FontSize="12.5"/>
-                                                    </StackPanel>
-                                                    <TextBlock Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="10" Foreground="#A6B2C6" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                </Grid>
-                                            </Border>
-                                            <Border Height="1" Background="#1FFFFFFF" Margin="8,4"/>
-                                            <Border CornerRadius="6" Padding="10,7" Visibility="{Binding Config.General.EnableGotoImport, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                <Grid>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="&#xE72A;" FontFamily="{StaticResource IconFont}" Foreground="#A6B2C6" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="Go to" Foreground="#F4F7FB" FontSize="12.5"/>
-                                                    </StackPanel>
-                                                    <TextBlock Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="10" Foreground="#A6B2C6" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                </Grid>
-                                            </Border>
-                                            <Border CornerRadius="6" Padding="10,7" Visibility="{Binding Config.General.EnableMoreOptionsMenu, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                <Grid>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="&#xE712;" FontFamily="{StaticResource IconFont}" Foreground="#A6B2C6" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="More options" Foreground="#F4F7FB" FontSize="12.5"/>
-                                                    </StackPanel>
-                                                    <TextBlock Text="&#xE76C;" FontFamily="{StaticResource IconFont}" FontSize="10" Foreground="#A6B2C6" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                </Grid>
-                                            </Border>
+                                <TextBlock Text="General" Style="{StaticResource SectionHeadingStyle}"/>
+                                <Border Style="{StaticResource AcrylicGroupStyle}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="160"/>
+                                            <ColumnDefinition Width="16"/>
+                                            <ColumnDefinition Width="90"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0">
+                                            <Grid>
+                                                <TextBlock Text="Show Delay" Style="{StaticResource SettingLabelStyle}"/>
+                                                <TextBlock Text="{Binding Config.General.ShowDelay, StringFormat={}{0} ms}" HorizontalAlignment="Right" FontSize="12" Foreground="{StaticResource AccentBrush}"/>
+                                            </Grid>
+                                            <Slider Minimum="0" Maximum="1000" TickFrequency="50" IsSnapToTickEnabled="True"
+                                                    Value="{Binding Config.General.ShowDelay}" Margin="0,8,0,0"/>
                                         </StackPanel>
+
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Language" Style="{StaticResource SettingLabelStyle}"/>
+                                            <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,6,0,0"
+                                                      ItemsSource="{Binding AvailableLanguages}" SelectedItem="{Binding Config.General.Language}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="4">
+                                            <TextBlock Text="Priority" Style="{StaticResource SettingLabelStyle}"/>
+                                            <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,6,0,0"
+                                                     Text="{Binding Config.General.Priority, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="Explorer only" Description="Exclude non-Explorer processes (!process.is_explorer)" IsChecked="{Binding Config.General.ExcludeNonExplorer}"/>
+                                        <ctrl:ToggleSettingCard Title="Remove duplicates" Description="Hide duplicate system menu entries" IsChecked="{Binding Config.General.RemoveDuplicates}"/>
+                                        <ctrl:ToggleSettingCard Title="Tooltips" Description="Show hover hints on menu items" IsChecked="{Binding Config.General.TipsEnabled}"/>
+                                        <ctrl:ToggleSettingCard Title="Pin / Unpin menu" Description="Include the Pin/Unpin submenu container" IsChecked="{Binding Config.General.EnablePinUnpinMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="More options menu" Description="Include the More options submenu container" IsChecked="{Binding Config.General.EnableMoreOptionsMenu}" IsLast="True"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Text="Modules" Style="{StaticResource SectionHeadingStyle}"/>
+                                <Border Style="{StaticResource AcrylicGroupStyle}">
+                                    <UniformGrid Columns="2">
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Theme (theme.nss)" IsChecked="{Binding Config.General.EnableThemeImport}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Icons (images.nss)" IsChecked="{Binding Config.General.EnableImagesImport}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Modify (modify.nss)" IsChecked="{Binding Config.General.EnableModifyImport}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Terminal (terminal.nss)" IsChecked="{Binding Config.General.EnableTerminalImport}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="File Manage (file-manage.nss)" IsChecked="{Binding Config.General.EnableFileManageImport}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Develop (develop.nss)" IsChecked="{Binding Config.General.EnableDevelopImport}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Go To (goto.nss)" IsChecked="{Binding Config.General.EnableGotoImport}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Taskbar (taskbar.nss)" IsChecked="{Binding Config.General.EnableTaskbarImport}"/>
+                                    </UniformGrid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== THEME ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Theme}">
+                                <Grid Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Theme" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="Context menu appearance in imports/theme.nss." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Enabled"
+                                              Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableThemeImport}"/>
+                                </Grid>
+
+                                <Border Style="{StaticResource AcrylicGroupStyle}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="14"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="14"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="12"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0" Grid.Column="0">
+                                            <TextBlock Text="Name" Style="{StaticResource SettingLabelStyle}"/>
+                                            <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,5,0,0" ItemsSource="{Binding ThemeNames}" SelectedItem="{Binding Config.Theme.Name}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="0" Grid.Column="2">
+                                            <TextBlock Text="Dark Mode" Style="{StaticResource SettingLabelStyle}"/>
+                                            <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,5,0,0" ItemsSource="{Binding DarkModeOptions}" SelectedItem="{Binding Config.Theme.DarkMode}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="0" Grid.Column="4">
+                                            <TextBlock Text="View" Style="{StaticResource SettingLabelStyle}"/>
+                                            <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,5,0,0" ItemsSource="{Binding ViewOptions}" SelectedItem="{Binding Config.Theme.View}"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2" Grid.Column="0">
+                                            <TextBlock Text="Background Effect" Style="{StaticResource SettingLabelStyle}"/>
+                                            <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,5,0,0" ItemsSource="{Binding EffectOptions}" SelectedItem="{Binding Config.Theme.BackgroundEffect}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Grid.Column="2">
+                                            <TextBlock Text="Background Color" Style="{StaticResource SettingLabelStyle}"/>
+                                            <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,0" Text="{Binding Config.Theme.BackgroundColor, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Grid.Column="4">
+                                            <Grid>
+                                                <TextBlock Text="Image Align" Style="{StaticResource SettingLabelStyle}"/>
+                                                <TextBlock Text="{Binding Config.Theme.ImageAlign}" HorizontalAlignment="Right" FontSize="12" Foreground="{StaticResource AccentBrush}"/>
+                                            </Grid>
+                                            <Slider Minimum="0" Maximum="2" TickFrequency="1" IsSnapToTickEnabled="True" Margin="0,9,0,0" Value="{Binding Config.Theme.ImageAlign}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="Auto opacity" Description="Let Shell decide menu background transparency" IsChecked="{Binding Config.Theme.UseAutoOpacity}"/>
+                                        <Grid Margin="0,8,0,10" Visibility="{Binding Config.Theme.UseAutoOpacity, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="120"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="44"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Opacity" Style="{StaticResource SettingDescStyle}" VerticalAlignment="Center"/>
+                                            <Slider Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding Config.Theme.BackgroundOpacity}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding Config.Theme.BackgroundOpacity, StringFormat={}{0}%}" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12" Foreground="{StaticResource AccentBrush}"/>
+                                        </Grid>
+
+                                        <ctrl:ToggleSettingCard Title="Border" Description="Menu outer border and corner radius" IsChecked="{Binding Config.Theme.BorderEnabled}"/>
+                                        <Grid Margin="0,6,0,10" Visibility="{Binding Config.Theme.BorderEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="18"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Config.Theme.BorderRadius, StringFormat='Radius: {0}'}" Style="{StaticResource SettingDescStyle}"/>
+                                                <Slider Minimum="0" Maximum="3" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Config.Theme.BorderRadius}" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="{Binding Config.Theme.BorderSize, StringFormat='Size: {0} px'}" Style="{StaticResource SettingDescStyle}"/>
+                                                <Slider Minimum="0" Maximum="10" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Config.Theme.BorderSize}" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <ctrl:ToggleSettingCard Title="Shadow" Description="Menu drop shadow" IsChecked="{Binding Config.Theme.ShadowEnabled}"/>
+                                        <Grid Margin="0,6,0,10" Visibility="{Binding Config.Theme.ShadowEnabled, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="18"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Config.Theme.ShadowSize, StringFormat='Size: {0}'}" Style="{StaticResource SettingDescStyle}"/>
+                                                <Slider Minimum="0" Maximum="30" Value="{Binding Config.Theme.ShadowSize}" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="{Binding Config.Theme.ShadowOpacity, StringFormat='Opacity: {0}%'}" Style="{StaticResource SettingDescStyle}"/>
+                                                <Slider Minimum="0" Maximum="100" Value="{Binding Config.Theme.ShadowOpacity}" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <ctrl:ToggleSettingCard Title="Custom font" Description="Override default system font for menu text" IsChecked="{Binding Config.Theme.UseCustomFont}" IsLast="True"/>
+                                        <Grid Margin="0,4,0,10" Visibility="{Binding Config.Theme.UseCustomFont, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="12"/>
+                                                <ColumnDefinition Width="110"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0" Style="{StaticResource AcrylicTextBoxStyle}" Text="{Binding Config.Theme.FontName, UpdateSourceTrigger=PropertyChanged}"/>
+                                            <TextBox Grid.Column="2" Style="{StaticResource AcrylicTextBoxStyle}" Text="{Binding Config.Theme.FontSize, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== MODIFY ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Modify}">
+                                <Grid Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Modify" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="Hide or group native Windows items in imports/modify.nss." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Enabled"
+                                              Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableModifyImport}"/>
+                                </Grid>
+
+                                <TextBlock Text="System Rules" Style="{StaticResource SectionHeadingStyle}"/>
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="Remove 'Restore previous versions'" IsChecked="{Binding Config.Modify.RemoveRestorePreviousVersions}"/>
+                                        <ctrl:ToggleSettingCard Title="Remove 'Cast to Device'" IsChecked="{Binding Config.Modify.RemoveCastToDevice}"/>
+                                        <ctrl:ToggleSettingCard Title="Promote 'Empty Recycle Bin' on Desktop" IsChecked="{Binding Config.Modify.PromoteEmptyRecycleBin}"/>
+                                        <ctrl:ToggleSettingCard Title="Group Pin / Unpin items" IsChecked="{Binding Config.Modify.GroupPinUnpin}"/>
+                                        <ctrl:ToggleSettingCard Title="Move 'Copy as path' to File Manage" IsChecked="{Binding Config.Modify.MoveCopyAsPathToFileManage}"/>
+                                        <ctrl:ToggleSettingCard Title="Move 'Customize this folder' to File Manage" IsChecked="{Binding Config.Modify.MoveCustomizeFolderToFileManage}"/>
+                                        <ctrl:ToggleSettingCard Title="Move native Terminal / PowerShell to Terminal" IsChecked="{Binding Config.Modify.MoveTerminalItemsToTerminal}" IsLast="True"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Text="Move to 'More options'" Style="{StaticResource SectionHeadingStyle}"/>
+                                <Border Style="{StaticResource AcrylicGroupStyle}">
+                                    <UniformGrid Columns="2">
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Send to" IsChecked="{Binding Config.Modify.MoreSendTo}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Share" IsChecked="{Binding Config.Modify.MoreShare}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Create shortcut" IsChecked="{Binding Config.Modify.MoreCreateShortcut}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Set as desktop background" IsChecked="{Binding Config.Modify.MoreSetDesktopBackground}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Rotate left" IsChecked="{Binding Config.Modify.MoreRotateLeft}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Rotate right" IsChecked="{Binding Config.Modify.MoreRotateRight}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Map network drive" IsChecked="{Binding Config.Modify.MoreMapNetworkDrive}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Disconnect network drive" IsChecked="{Binding Config.Modify.MoreDisconnectNetworkDrive}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Format" IsChecked="{Binding Config.Modify.MoreFormat}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Eject" IsChecked="{Binding Config.Modify.MoreEject}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Give access to" IsChecked="{Binding Config.Modify.MoreGiveAccessTo}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Include in library" IsChecked="{Binding Config.Modify.MoreIncludeInLibrary}"/>
+                                        <CheckBox Margin="0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Print" IsChecked="{Binding Config.Modify.MorePrint}"/>
+                                    </UniformGrid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== TERMINAL ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Terminal}">
+                                <Grid Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Terminal" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="Shell entries in imports/terminal.nss." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Enabled"
+                                              Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableTerminalImport}"/>
+                                </Grid>
+
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="Shift / Right-Click for Administrator" Description="Run any terminal item elevated with a tooltip hint" IsChecked="{Binding Config.Terminal.EnableAdminModifier}"/>
+                                        <ctrl:ToggleSettingCard Title="Command Prompt" Description="Open cmd.exe in the selected folder" IsChecked="{Binding Config.Terminal.CommandPrompt}"/>
+                                        <ctrl:ToggleSettingCard Title="Windows PowerShell" Description="Open powershell.exe in the selected folder" IsChecked="{Binding Config.Terminal.WindowsPowerShell}"/>
+                                        <ctrl:ToggleSettingCard Title="Windows Terminal" Description="Shown automatically when Windows Terminal is installed" IsChecked="{Binding Config.Terminal.WindowsTerminal}" IsLast="True"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== FILE MANAGE ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=FileManage}">
+                                <Grid Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="File Manage" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="File utilities in imports/file-manage.nss." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Enabled"
+                                              Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableFileManageImport}"/>
+                                </Grid>
+
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="Copy Path submenu" IsChecked="{Binding Config.FileManage.CopyPathMenu}"/>
+                                        <Border Margin="0,0,0,8" Padding="10,6" Background="{StaticResource SubCardBrush}" CornerRadius="6"
+                                                Visibility="{Binding Config.FileManage.CopyPathMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <UniformGrid Columns="2">
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Multiple paths" IsChecked="{Binding Config.FileManage.CopyMultiplePaths}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Full path" IsChecked="{Binding Config.FileManage.CopyFullPath}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Shortcut target" IsChecked="{Binding Config.FileManage.CopyShortcutTarget}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Parent path" IsChecked="{Binding Config.FileManage.CopyParentPath}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="File name" IsChecked="{Binding Config.FileManage.CopyFileName}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="File title" IsChecked="{Binding Config.FileManage.CopyFileTitle}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Extension" IsChecked="{Binding Config.FileManage.CopyFileExtension}"/>
+                                            </UniformGrid>
+                                        </Border>
+
+                                        <ctrl:ToggleSettingCard Title="Change extension" IsChecked="{Binding Config.FileManage.ChangeExtension}"/>
+                                        <ctrl:ToggleSettingCard Title="Select (All / Invert / None)" IsChecked="{Binding Config.FileManage.SelectMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="Take ownership" IsChecked="{Binding Config.FileManage.TakeOwnership}"/>
+                                        <ctrl:ToggleSettingCard Title="Show / Hide (System files &amp; extensions)" IsChecked="{Binding Config.FileManage.ShowHideMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="Attributes" IsChecked="{Binding Config.FileManage.AttributesMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="Register Server (.dll / .ocx)" IsChecked="{Binding Config.FileManage.RegisterServerMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="New Folder (DateTime / GUID)" IsChecked="{Binding Config.FileManage.NewFolderMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="New File (TXT / XML / JSON / HTML)" IsChecked="{Binding Config.FileManage.NewFileMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="Folder Options" IsChecked="{Binding Config.FileManage.FolderOptions}" IsLast="True"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== DEVELOP ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Develop}">
+                                <Grid Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Develop" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="Developer tools in imports/develop.nss." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Enabled"
+                                              Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableDevelopImport}"/>
+                                </Grid>
+
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="Editors submenu" IsChecked="{Binding Config.Develop.EditorsMenu}"/>
+                                        <Border Margin="0,0,0,8" Padding="10,6" Background="{StaticResource SubCardBrush}" CornerRadius="6"
+                                                Visibility="{Binding Config.Develop.EditorsMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <UniformGrid Columns="2">
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Visual Studio Code" IsChecked="{Binding Config.Develop.VsCode}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Windows Notepad" IsChecked="{Binding Config.Develop.Notepad}"/>
+                                            </UniformGrid>
+                                        </Border>
+
+                                        <ctrl:ToggleSettingCard Title="dotnet submenu" IsChecked="{Binding Config.Develop.DotnetMenu}" IsLast="True"/>
+                                        <Border Margin="0,0,0,10" Padding="10,6" Background="{StaticResource SubCardBrush}" CornerRadius="6"
+                                                Visibility="{Binding Config.Develop.DotnetMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <UniformGrid Columns="2">
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="run / watch / clean" IsChecked="{Binding Config.Develop.DotnetRunWatchClean}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="build (debug / release)" IsChecked="{Binding Config.Develop.DotnetBuild}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="publish presets" IsChecked="{Binding Config.Develop.DotnetPublish}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="EF migrations" IsChecked="{Binding Config.Develop.DotnetEf}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="help / --info" IsChecked="{Binding Config.Develop.DotnetHelpInfo}"/>
+                                            </UniformGrid>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBlock Text="External Tools" Style="{StaticResource SectionHeadingStyle}"/>
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="reshack" IsChecked="{Binding Config.Develop.Reshack}"/>
+                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,0,0,8" Visibility="{Binding Config.Develop.Reshack, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Text="{Binding Config.Develop.ReshackPath, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                        <ctrl:ToggleSettingCard Title="peview" IsChecked="{Binding Config.Develop.Peview}"/>
+                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,0,0,8" Visibility="{Binding Config.Develop.Peview, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Text="{Binding Config.Develop.PeviewPath, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                        <ctrl:ToggleSettingCard Title="Web server (Shift)" IsChecked="{Binding Config.Develop.WebServer}" IsLast="True"/>
+                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,0,0,10" Visibility="{Binding Config.Develop.WebServer, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                 Text="{Binding Config.Develop.WebServerPath, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== GO TO ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Goto}">
+                                <Grid Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Go To" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="Quick navigation in imports/goto.nss." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Enabled"
+                                              Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableGotoImport}"/>
+                                </Grid>
+
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="Folders submenu" IsChecked="{Binding Config.Goto.FoldersMenu}"/>
+                                        <Border Margin="0,0,0,8" Padding="10,6" Background="{StaticResource SubCardBrush}" CornerRadius="6"
+                                                Visibility="{Binding Config.Goto.FoldersMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <UniformGrid Columns="3">
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Windows" IsChecked="{Binding Config.Goto.FolderWindows}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="System" IsChecked="{Binding Config.Goto.FolderSystem}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Program Files" IsChecked="{Binding Config.Goto.FolderProgramFiles}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Program Files x86" IsChecked="{Binding Config.Goto.FolderProgramFilesX86}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="ProgramData" IsChecked="{Binding Config.Goto.FolderProgramData}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Applications" IsChecked="{Binding Config.Goto.FolderApplications}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Users" IsChecked="{Binding Config.Goto.FolderUsers}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Desktop" IsChecked="{Binding Config.Goto.FolderDesktop}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Downloads" IsChecked="{Binding Config.Goto.FolderDownloads}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Pictures" IsChecked="{Binding Config.Goto.FolderPictures}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Documents" IsChecked="{Binding Config.Goto.FolderDocuments}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Startmenu" IsChecked="{Binding Config.Goto.FolderStartMenu}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Profile" IsChecked="{Binding Config.Goto.FolderProfile}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="AppData" IsChecked="{Binding Config.Goto.FolderAppData}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Temp" IsChecked="{Binding Config.Goto.FolderTemp}"/>
+                                            </UniformGrid>
+                                        </Border>
+
+                                        <ctrl:ToggleSettingCard Title="Control Panel" IsChecked="{Binding Config.Goto.ControlPanel}"/>
+                                        <ctrl:ToggleSettingCard Title="All Control Panel Items" IsChecked="{Binding Config.Goto.AllControlPanelItems}"/>
+                                        <ctrl:ToggleSettingCard Title="Run" IsChecked="{Binding Config.Goto.RunDialog}"/>
+                                        <ctrl:ToggleSettingCard Title="Windows Settings submenu" IsChecked="{Binding Config.Goto.WindowsSettingsMenu}" IsLast="True"/>
+                                        <Border Margin="0,0,0,10" Padding="10,6" Background="{StaticResource SubCardBrush}" CornerRadius="6"
+                                                Visibility="{Binding Config.Goto.WindowsSettingsMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <UniformGrid Columns="2">
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="System / About / USB" IsChecked="{Binding Config.Goto.SettingsSystem}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Update &amp; Defender" IsChecked="{Binding Config.Goto.SettingsUpdateDefender}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Apps" IsChecked="{Binding Config.Goto.SettingsApps}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Personalization" IsChecked="{Binding Config.Goto.SettingsPersonalization}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Network" IsChecked="{Binding Config.Goto.SettingsNetwork}"/>
+                                            </UniformGrid>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== TASKBAR ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Taskbar}">
+                                <Grid Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Taskbar" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="Taskbar context menu in imports/taskbar.nss." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Enabled"
+                                              Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableTaskbarImport}"/>
+                                </Grid>
+
+                                <Border Style="{StaticResource AcrylicListGroupStyle}">
+                                    <StackPanel>
+                                        <ctrl:ToggleSettingCard Title="Shell menu (Shift + Click)" Description="Quick access to config, manager, directory, and docs" IsChecked="{Binding Config.Taskbar.ShellAdminMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="Configurator shortcut in Shell menu" IsChecked="{Binding Config.Taskbar.IncludeConfiguratorShortcut}"/>
+                                        <ctrl:ToggleSettingCard Title="Apps submenu" IsChecked="{Binding Config.Taskbar.AppsMenu}"/>
+                                        <Border Margin="0,0,0,8" Padding="10,6" Background="{StaticResource SubCardBrush}" CornerRadius="6"
+                                                Visibility="{Binding Config.Taskbar.AppsMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <UniformGrid Columns="2">
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Paint" IsChecked="{Binding Config.Taskbar.AppPaint}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Edge" IsChecked="{Binding Config.Taskbar.AppEdge}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Calculator" IsChecked="{Binding Config.Taskbar.AppCalculator}"/>
+                                                <CheckBox Margin="0,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Registry Editor" IsChecked="{Binding Config.Taskbar.AppRegedit}"/>
+                                            </UniformGrid>
+                                        </Border>
+                                        <ctrl:ToggleSettingCard Title="Windows arrangement submenu" IsChecked="{Binding Config.Taskbar.WindowsMenu}"/>
+                                        <ctrl:ToggleSettingCard Title="Desktop" IsChecked="{Binding Config.Taskbar.ShowDesktop}"/>
+                                        <ctrl:ToggleSettingCard Title="Settings" IsChecked="{Binding Config.Taskbar.WindowsSettings}"/>
+                                        <ctrl:ToggleSettingCard Title="Task Manager" IsChecked="{Binding Config.Taskbar.TaskManager}"/>
+                                        <ctrl:ToggleSettingCard Title="Taskbar Settings" IsChecked="{Binding Config.Taskbar.TaskbarSettingsLink}"/>
+                                        <ctrl:ToggleSettingCard Title="Restart Explorer (Shift)" IsChecked="{Binding Config.Taskbar.RestartExplorerOnShift}" IsLast="True"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- ==================== CUSTOM ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Custom}">
+                                <Grid Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <TextBlock Text="Custom" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="User-defined entries in imports/user.nss." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                        <Button Content="+ Add" Style="{StaticResource AcrylicPrimaryButtonStyle}" Command="{Binding AddCustomItemCommand}" Margin="0,0,6,0"/>
+                                        <Button Content="Duplicate" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding DuplicateCustomItemCommand}" Margin="0,0,6,0"/>
+                                        <Button Content="Delete" Style="{StaticResource AcrylicDangerButtonStyle}" Command="{Binding RemoveCustomItemCommand}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="220"/>
+                                        <ColumnDefinition Width="12"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0" Style="{StaticResource AcrylicGroupStyle}" Padding="6" MinHeight="360">
+                                        <Grid>
+                                            <ListBox ItemsSource="{Binding Config.CustomItems}" SelectedItem="{Binding SelectedCustomItem}" Background="Transparent" BorderThickness="0">
+                                                <ListBox.ItemContainerStyle>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="Padding" Value="8,6"/>
+                                                        <Setter Property="Margin" Value="0,0,0,3"/>
+                                                        <Setter Property="Cursor" Value="Hand"/>
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="ListBoxItem">
+                                                                    <Border x:Name="Bd" CornerRadius="6" Padding="{TemplateBinding Padding}" Background="Transparent">
+                                                                        <ContentPresenter/>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource SubCardBrush}"/>
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsSelected" Value="True">
+                                                                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </ListBox.ItemContainerStyle>
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid>
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding Title}" FontSize="12.5" FontWeight="Medium" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                                <TextBlock Text="{Binding ContextType}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                            </StackPanel>
+                                                            <CheckBox HorizontalAlignment="Right" Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Enabled}"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                            <TextBlock Text="No custom items" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"
+                                                       Visibility="{Binding HasCustomItems, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <Border Grid.Column="2" Style="{StaticResource AcrylicGroupStyle}" MinHeight="360">
+                                        <Grid>
+                                            <StackPanel Visibility="{Binding SelectedCustomItem, Converter={StaticResource NullToCollapsedConverter}}">
+                                                <Grid Margin="0,0,0,10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="10"/>
+                                                        <ColumnDefinition Width="140"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="Title" Style="{StaticResource SettingLabelStyle}"/>
+                                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,0" Text="{Binding SelectedCustomItem.Title, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="2">
+                                                        <TextBlock Text="Type" Style="{StaticResource SettingLabelStyle}"/>
+                                                        <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,5,0,0" ItemsSource="{Binding ContextTypeOptions}" SelectedItem="{Binding SelectedCustomItem.ContextType}"/>
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <Grid Margin="0,0,0,10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="10"/>
+                                                        <ColumnDefinition Width="140"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="Submenu (optional)" Style="{StaticResource SettingLabelStyle}"/>
+                                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,0" Text="{Binding SelectedCustomItem.Submenu, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="2">
+                                                        <TextBlock Text="Separator" Style="{StaticResource SettingLabelStyle}"/>
+                                                        <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,5,0,0" ItemsSource="{Binding SeparatorOptions}" SelectedItem="{Binding SelectedCustomItem.Separator}"/>
+                                                    </StackPanel>
+                                                </Grid>
+
+                                                <TextBlock Text="Command" Style="{StaticResource SettingLabelStyle}"/>
+                                                <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,10" Text="{Binding SelectedCustomItem.Command, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                                <TextBlock Text="Arguments" Style="{StaticResource SettingLabelStyle}"/>
+                                                <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,10" Text="{Binding SelectedCustomItem.Arguments, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="14"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Grid.Column="0">
+                                                        <TextBlock Text="Image / Icon" Style="{StaticResource SettingLabelStyle}"/>
+                                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,0" Text="{Binding SelectedCustomItem.Icon, UpdateSourceTrigger=PropertyChanged}"/>
+                                                    </StackPanel>
+                                                    <CheckBox Grid.Column="2" VerticalAlignment="Bottom" Margin="0,0,0,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Admin" IsChecked="{Binding SelectedCustomItem.RunAsAdmin}"/>
+                                                </Grid>
+                                            </StackPanel>
+
+                                            <TextBlock Text="Select an item to edit." VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedCustomItem}" Value="{x:Null}">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
                                     </Border>
                                 </Grid>
-                            </Border>
+                            </StackPanel>
 
-                            <Border Style="{StaticResource AcrylicCardStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="14"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <StackPanel Grid.Row="0" Grid.Column="0">
-                                        <TextBlock Text="Theme Preset" Style="{StaticResource SettingLabelStyle}"/>
-                                        <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,6,0,0"
-                                                  ItemsSource="{Binding ThemeNames}" SelectedItem="{Binding Config.Theme.Name}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="0" Grid.Column="2">
-                                        <TextBlock Text="Dark Mode" Style="{StaticResource SettingLabelStyle}"/>
-                                        <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,6,0,0"
-                                                  ItemsSource="{Binding DarkModeOptions}" SelectedItem="{Binding Config.Theme.DarkMode}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="0" Grid.Column="4">
-                                        <TextBlock Text="Menu Density (View)" Style="{StaticResource SettingLabelStyle}"/>
-                                        <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,6,0,0"
-                                                  ItemsSource="{Binding ViewOptions}" SelectedItem="{Binding Config.Theme.View}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="2" Grid.Column="0">
-                                        <TextBlock Text="Backdrop Effect" Style="{StaticResource SettingLabelStyle}"/>
-                                        <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,6,0,0"
-                                                  ItemsSource="{Binding EffectOptions}" SelectedItem="{Binding Config.Theme.BackgroundEffect}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="2" Grid.Column="2">
-                                        <TextBlock Text="Background Color" Style="{StaticResource SettingLabelStyle}"/>
-                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,6,0,0"
-                                                 Text="{Binding Config.Theme.BackgroundColor, UpdateSourceTrigger=PropertyChanged}"
-                                                 ToolTip="Use 'auto' or a hex color like #1A202C"/>
-                                    </StackPanel>
-
-                                    <StackPanel Grid.Row="2" Grid.Column="4">
-                                        <TextBlock Text="Icon Alignment (0-2)" Style="{StaticResource SettingLabelStyle}"/>
-                                        <Slider Minimum="0" Maximum="2" TickFrequency="1" IsSnapToTickEnabled="True"
-                                                Margin="0,10,0,0" Value="{Binding Config.Theme.ImageAlign}"/>
-                                        <TextBlock Text="{Binding Config.Theme.ImageAlign, StringFormat='Mode: {0} (2 = Image + Check)'}"
-                                                   FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE793;" Title="Auto Background Opacity"
-                                                    Description="Let Nilesoft Shell pick optimal transparency automatically (turn off to customize slider)."
-                                                    IsChecked="{Binding Config.Theme.UseAutoOpacity}"/>
-
-                            <Border Style="{StaticResource AcrylicCardStyle}"
-                                    Visibility="{Binding Config.Theme.UseAutoOpacity, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="52"/>
-                                    </Grid.ColumnDefinitions>
+                            <!-- ==================== SCRIPT PREVIEW ==================== -->
+                            <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Script}">
+                                <Grid Margin="0,0,0,12">
                                     <StackPanel>
-                                        <TextBlock Text="Custom Background Opacity" Style="{StaticResource SettingLabelStyle}"/>
-                                        <Slider Minimum="0" Maximum="100" Value="{Binding Config.Theme.BackgroundOpacity}" Margin="0,8,0,0"/>
+                                        <TextBlock Text="Script" Style="{StaticResource PageTitleStyle}"/>
+                                        <TextBlock Text="Generated .nss files preview." Style="{StaticResource PageSubtitleStyle}" Margin="0,3,0,0"/>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="1" Text="{Binding Config.Theme.BackgroundOpacity, StringFormat={}{0}%}"
-                                               VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}"/>
+                                    <ComboBox HorizontalAlignment="Right" VerticalAlignment="Center" Width="210"
+                                              Style="{StaticResource AcrylicComboBoxStyle}"
+                                              ItemsSource="{Binding PreviewFiles}"
+                                              SelectedItem="{Binding SelectedPreviewFile}"/>
                                 </Grid>
-                            </Border>
 
-                            <UniformGrid Columns="2">
-                                <Border Style="{StaticResource AcrylicCardStyle}" Margin="0,0,6,10">
-                                    <StackPanel>
-                                        <Grid>
-                                            <TextBlock Text="Border" Style="{StaticResource SectionHeadingStyle}" Margin="0"/>
-                                            <CheckBox HorizontalAlignment="Right" Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.Theme.BorderEnabled}"/>
-                                        </Grid>
-                                        <TextBlock Text="{Binding Config.Theme.BorderRadius, StringFormat=Corner Radius: {0}}" Style="{StaticResource SettingDescStyle}" Margin="0,10,0,4"/>
-                                        <Slider Minimum="0" Maximum="3" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Config.Theme.BorderRadius}"/>
-                                        <TextBlock Text="{Binding Config.Theme.BorderSize, StringFormat=Border Thickness: {0} px}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,4"/>
-                                        <Slider Minimum="0" Maximum="10" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding Config.Theme.BorderSize}"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Style="{StaticResource AcrylicCardStyle}" Margin="6,0,0,10">
-                                    <StackPanel>
-                                        <Grid>
-                                            <TextBlock Text="Drop Shadow" Style="{StaticResource SectionHeadingStyle}" Margin="0"/>
-                                            <CheckBox HorizontalAlignment="Right" Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.Theme.ShadowEnabled}"/>
-                                        </Grid>
-                                        <TextBlock Text="{Binding Config.Theme.ShadowSize, StringFormat=Shadow Size: {0}}" Style="{StaticResource SettingDescStyle}" Margin="0,10,0,4"/>
-                                        <Slider Minimum="0" Maximum="30" Value="{Binding Config.Theme.ShadowSize}"/>
-                                        <TextBlock Text="{Binding Config.Theme.ShadowOpacity, StringFormat=Shadow Opacity: {0}%}" Style="{StaticResource SettingDescStyle}" Margin="0,8,0,4"/>
-                                        <Slider Minimum="0" Maximum="100" Value="{Binding Config.Theme.ShadowOpacity}"/>
-                                    </StackPanel>
-                                </Border>
-                            </UniformGrid>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE8D2;" Title="Override Menu Font"
-                                                    Description="Customize font family and font size for context menu items."
-                                                    IsChecked="{Binding Config.Theme.UseCustomFont}"/>
-
-                            <Border Style="{StaticResource AcrylicCardStyle}"
-                                    Visibility="{Binding Config.Theme.UseCustomFont, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="16"/>
-                                        <ColumnDefinition Width="140"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Font Family" Style="{StaticResource SettingLabelStyle}"/>
-                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,6,0,0"
-                                                 Text="{Binding Config.Theme.FontName, UpdateSourceTrigger=PropertyChanged}"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Font Size" Style="{StaticResource SettingLabelStyle}"/>
-                                        <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,6,0,0"
-                                                 Text="{Binding Config.Theme.FontSize, UpdateSourceTrigger=PropertyChanged}"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 3: MODIFY SYSTEM ITEMS ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Modify}">
-                            <Grid Margin="0,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="Modify System Context Menu" Style="{StaticResource PageTitleStyle}"/>
-                                    <TextBlock Text="Configure imports/modify.nss — declutter native Windows options or organize them into submenus."
-                                               Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Module Enabled"
-                                          Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableModifyImport}"/>
-                            </Grid>
-
-                            <TextBlock Text="Declutter &amp; Reorganize" Style="{StaticResource SectionHeadingStyle}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE74D;" Title="Remove 'Restore previous versions'" Description="Hides the built-in shadow copy entry." IsChecked="{Binding Config.Modify.RemoveRestorePreviousVersions}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE74D;" Title="Remove 'Cast to Device'" Description="Hides the DLNA media casting entry." IsChecked="{Binding Config.Modify.RemoveCastToDevice}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE74D;" Title="Promote 'Empty Recycle Bin'" Description="Places Empty Recycle Bin at top when right-clicking Recycle Bin on Desktop." IsChecked="{Binding Config.Modify.PromoteEmptyRecycleBin}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE718;" Title="Group Pin &amp; Unpin Items" Description="Consolidates all Pin/Unpin entries into the Pin/Unpin submenu." IsChecked="{Binding Config.Modify.GroupPinUnpin}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE8C8;" Title="Move 'Copy as path' to File Manage" Description="Moves Windows' built-in Copy as path under File Manage." IsChecked="{Binding Config.Modify.MoveCopyAsPathToFileManage}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE8B7;" Title="Move 'Customize this folder' to File Manage" Description="Places folder customization inside File Manage on folder/drive background." IsChecked="{Binding Config.Modify.MoveCustomizeFolderToFileManage}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE756;" Title="Move Native Terminal Items to Terminal" Description="Groups Open in Terminal, Linux shell, and PowerShell under Terminal." IsChecked="{Binding Config.Modify.MoveTerminalItemsToTerminal}"/>
-
-                            <TextBlock Text="Move Items Into 'More options' Submenu" Style="{StaticResource SectionHeadingStyle}" Margin="0,12,0,8"/>
-                            <UniformGrid Columns="2">
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Title="Send to" IsChecked="{Binding Config.Modify.MoreSendTo}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Title="Share" IsChecked="{Binding Config.Modify.MoreShare}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Title="Create shortcut" IsChecked="{Binding Config.Modify.MoreCreateShortcut}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Title="Set as desktop background" IsChecked="{Binding Config.Modify.MoreSetDesktopBackground}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Title="Rotate left" IsChecked="{Binding Config.Modify.MoreRotateLeft}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Title="Rotate right" IsChecked="{Binding Config.Modify.MoreRotateRight}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Title="Map network drive" IsChecked="{Binding Config.Modify.MoreMapNetworkDrive}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Title="Disconnect network drive" IsChecked="{Binding Config.Modify.MoreDisconnectNetworkDrive}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Title="Format" IsChecked="{Binding Config.Modify.MoreFormat}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Title="Eject" IsChecked="{Binding Config.Modify.MoreEject}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Title="Give access to" IsChecked="{Binding Config.Modify.MoreGiveAccessTo}"/>
-                                <ctrl:ToggleSettingCard Margin="6,0,0,0" Title="Include in library" IsChecked="{Binding Config.Modify.MoreIncludeInLibrary}"/>
-                                <ctrl:ToggleSettingCard Margin="0,0,6,0" Title="Print" IsChecked="{Binding Config.Modify.MorePrint}"/>
-                            </UniformGrid>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 4: TERMINAL ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Terminal}">
-                            <Grid Margin="0,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="Terminal Category" Style="{StaticResource PageTitleStyle}"/>
-                                    <TextBlock Text="Configure imports/terminal.nss — choose which shells appear in the Terminal submenu."
-                                               Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Module Enabled"
-                                          Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableTerminalImport}"/>
-                            </Grid>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE72E;" Title="Shift / Right-Click to Run as Administrator"
-                                                    Description="Hold Shift or use Right-Click on any Terminal item to launch elevated with a warning tooltip."
-                                                    IsChecked="{Binding Config.Terminal.EnableAdminModifier}"/>
-
-                            <TextBlock Text="Terminal Entries" Style="{StaticResource SectionHeadingStyle}" Margin="0,10,0,8"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE756;" Title="Command Prompt (cmd.exe)"
-                                                    Description="Opens Command Prompt directly in the selected directory."
-                                                    IsChecked="{Binding Config.Terminal.CommandPrompt}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE756;" Title="Windows PowerShell"
-                                                    Description="Opens Windows PowerShell in the selected directory."
-                                                    IsChecked="{Binding Config.Terminal.WindowsPowerShell}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE756;" Title="Windows Terminal (wt.exe)"
-                                                    Description="Automatically displayed when Windows Terminal package is installed."
-                                                    IsChecked="{Binding Config.Terminal.WindowsTerminal}"/>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 5: FILE MANAGE ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=FileManage}">
-                            <Grid Margin="0,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="File Manage Category" Style="{StaticResource PageTitleStyle}"/>
-                                    <TextBlock Text="Configure imports/file-manage.nss — power-user file utilities, attributes, ownership, and quick templates."
-                                               Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Module Enabled"
-                                          Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableFileManageImport}"/>
-                            </Grid>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE8C8;" Title="Copy Path Submenu"
-                                                    Description="Provides quick clipboard copy options for full path, parent, filename, title, and extension."
-                                                    IsChecked="{Binding Config.FileManage.CopyPathMenu}"/>
-
-                            <Border Style="{StaticResource AcrylicSubCardStyle}" Margin="20,0,0,10"
-                                    Visibility="{Binding Config.FileManage.CopyPathMenu, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <UniformGrid Columns="2">
-                                    <CheckBox Margin="4,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Multiple selected paths" IsChecked="{Binding Config.FileManage.CopyMultiplePaths}"/>
-                                    <CheckBox Margin="4,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Full item path" IsChecked="{Binding Config.FileManage.CopyFullPath}"/>
-                                    <CheckBox Margin="4,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Shortcut (.lnk) target" IsChecked="{Binding Config.FileManage.CopyShortcutTarget}"/>
-                                    <CheckBox Margin="4,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Parent directory path" IsChecked="{Binding Config.FileManage.CopyParentPath}"/>
-                                    <CheckBox Margin="4,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="File / folder name" IsChecked="{Binding Config.FileManage.CopyFileName}"/>
-                                    <CheckBox Margin="4,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="File title (without ext)" IsChecked="{Binding Config.FileManage.CopyFileTitle}"/>
-                                    <CheckBox Margin="4,5" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="File extension" IsChecked="{Binding Config.FileManage.CopyFileExtension}"/>
-                                </UniformGrid>
-                            </Border>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE8AC;" Title="Change Extension" Description="Prompt to quickly rename a file's extension." IsChecked="{Binding Config.FileManage.ChangeExtension}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE762;" Title="Select Submenu (All / Invert / None)" Description="Quick file selection commands inside Explorer." IsChecked="{Binding Config.FileManage.SelectMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE72E;" Title="Take Ownership (Admin)" Description="Runs takeown &amp; icacls to grant Administrators full access." IsChecked="{Binding Config.FileManage.TakeOwnership}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE890;" Title="Show / Hide (System Files &amp; Extensions)" Description="One-click toggles for hidden files and file name extensions." IsChecked="{Binding Config.FileManage.ShowHideMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE946;" Title="Attributes Submenu" Description="Toggle Hidden, System, Read-Only, Archive flags and inspect timestamps." IsChecked="{Binding Config.FileManage.AttributesMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE74C;" Title="Register Server (.dll / .ocx)" Description="Run regsvr32 Register or Unregister on DLL/OCX files." IsChecked="{Binding Config.FileManage.RegisterServerMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE8F4;" Title="New Folder Templates (DateTime / GUID)" Description="Create timestamped or GUID-named folders on directory background." IsChecked="{Binding Config.FileManage.NewFolderMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE8A5;" Title="New File Templates (TXT / XML / JSON / HTML)" Description="Create starter files with timestamp names on directory background." IsChecked="{Binding Config.FileManage.NewFileMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE713;" Title="Folder Options" Description="Opens Windows Explorer Folder Options dialog." IsChecked="{Binding Config.FileManage.FolderOptions}"/>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 6: DEVELOP ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Develop}">
-                            <Grid Margin="0,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="Develop Category" Style="{StaticResource PageTitleStyle}"/>
-                                    <TextBlock Text="Configure imports/develop.nss — code editors, dotnet CLI commands, and external developer tools."
-                                               Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Module Enabled"
-                                          Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableDevelopImport}"/>
-                            </Grid>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE70F;" Title="Editors Submenu" Description="Open files or folders in code editors." IsChecked="{Binding Config.Develop.EditorsMenu}"/>
-                            <Border Style="{StaticResource AcrylicSubCardStyle}" Margin="20,0,0,10"
-                                    Visibility="{Binding Config.Develop.EditorsMenu, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <UniformGrid Columns="2">
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Visual Studio Code" IsChecked="{Binding Config.Develop.VsCode}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Windows Notepad" IsChecked="{Binding Config.Develop.Notepad}"/>
-                                </UniformGrid>
-                            </Border>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE943;" Title="dotnet CLI Submenu" Description="Run, watch, clean, build, publish, and EF Core commands." IsChecked="{Binding Config.Develop.DotnetMenu}"/>
-                            <Border Style="{StaticResource AcrylicSubCardStyle}" Margin="20,0,0,10"
-                                    Visibility="{Binding Config.Develop.DotnetMenu, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <UniformGrid Columns="2">
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="run / watch / clean" IsChecked="{Binding Config.Develop.DotnetRunWatchClean}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="build (debug &amp; release)" IsChecked="{Binding Config.Develop.DotnetBuild}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="publish presets submenu" IsChecked="{Binding Config.Develop.DotnetPublish}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="EF Core migrations" IsChecked="{Binding Config.Develop.DotnetEf}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="help &amp; --info" IsChecked="{Binding Config.Develop.DotnetHelpInfo}"/>
-                                </UniformGrid>
-                            </Border>
-
-                            <TextBlock Text="Optional External Tools" Style="{StaticResource SectionHeadingStyle}" Margin="0,10,0,8"/>
-                            <Border Style="{StaticResource AcrylicCardStyle}">
-                                <StackPanel>
-                                    <Grid>
-                                        <TextBlock Text="Resource Hacker (reshack)" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center"/>
-                                        <CheckBox HorizontalAlignment="Right" Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.Develop.Reshack}"/>
-                                    </Grid>
-                                    <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,8,0,0"
-                                             IsEnabled="{Binding Config.Develop.Reshack}"
-                                             Text="{Binding Config.Develop.ReshackPath, UpdateSourceTrigger=PropertyChanged}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Style="{StaticResource AcrylicCardStyle}">
-                                <StackPanel>
-                                    <Grid>
-                                        <TextBlock Text="PEView" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center"/>
-                                        <CheckBox HorizontalAlignment="Right" Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.Develop.Peview}"/>
-                                    </Grid>
-                                    <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,8,0,0"
-                                             IsEnabled="{Binding Config.Develop.Peview}"
-                                             Text="{Binding Config.Develop.PeviewPath, UpdateSourceTrigger=PropertyChanged}"/>
-                                </StackPanel>
-                            </Border>
-
-                            <Border Style="{StaticResource AcrylicCardStyle}">
-                                <StackPanel>
-                                    <Grid>
-                                        <TextBlock Text="Local HTTP Web Server (Shift)" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center"/>
-                                        <CheckBox HorizontalAlignment="Right" Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.Develop.WebServer}"/>
-                                    </Grid>
-                                    <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,8,0,0"
-                                             IsEnabled="{Binding Config.Develop.WebServer}"
-                                             Text="{Binding Config.Develop.WebServerPath, UpdateSourceTrigger=PropertyChanged}"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 7: GO TO ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Goto}">
-                            <Grid Margin="0,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="Go To Category" Style="{StaticResource PageTitleStyle}"/>
-                                    <TextBlock Text="Configure imports/goto.nss — fast navigation to System/User folders, Control Panel, Run, and Settings."
-                                               Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Module Enabled"
-                                          Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableGotoImport}"/>
-                            </Grid>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE8B7;" Title="Folders Submenu" Description="Quick jump links to key Windows and User directories." IsChecked="{Binding Config.Goto.FoldersMenu}"/>
-                            <Border Style="{StaticResource AcrylicSubCardStyle}" Margin="20,0,0,10"
-                                    Visibility="{Binding Config.Goto.FoldersMenu, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <UniformGrid Columns="3">
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Windows" IsChecked="{Binding Config.Goto.FolderWindows}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="System32" IsChecked="{Binding Config.Goto.FolderSystem}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Program Files" IsChecked="{Binding Config.Goto.FolderProgramFiles}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Program Files x86" IsChecked="{Binding Config.Goto.FolderProgramFilesX86}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="ProgramData" IsChecked="{Binding Config.Goto.FolderProgramData}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Applications" IsChecked="{Binding Config.Goto.FolderApplications}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Users" IsChecked="{Binding Config.Goto.FolderUsers}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Desktop" IsChecked="{Binding Config.Goto.FolderDesktop}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Downloads" IsChecked="{Binding Config.Goto.FolderDownloads}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Pictures" IsChecked="{Binding Config.Goto.FolderPictures}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Documents" IsChecked="{Binding Config.Goto.FolderDocuments}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Startmenu" IsChecked="{Binding Config.Goto.FolderStartMenu}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Profile" IsChecked="{Binding Config.Goto.FolderProfile}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="AppData" IsChecked="{Binding Config.Goto.FolderAppData}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Temp" IsChecked="{Binding Config.Goto.FolderTemp}"/>
-                                </UniformGrid>
-                            </Border>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE713;" Title="Control Panel" Description="Opens classic Control Panel." IsChecked="{Binding Config.Goto.ControlPanel}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE713;" Title="All Control Panel Items (God Mode)" Description="Opens the complete list of Control Panel applets." IsChecked="{Binding Config.Goto.AllControlPanelItems}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE756;" Title="Run Dialog" Description="Opens the Windows Run prompt." IsChecked="{Binding Config.Goto.RunDialog}"/>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE713;" Title="Windows Settings Submenu" Description="Deep-links into Windows 10/11 Settings pages." IsChecked="{Binding Config.Goto.WindowsSettingsMenu}"/>
-                            <Border Style="{StaticResource AcrylicSubCardStyle}" Margin="20,0,0,10"
-                                    Visibility="{Binding Config.Goto.WindowsSettingsMenu, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <UniformGrid Columns="2">
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="System / About / USB" IsChecked="{Binding Config.Goto.SettingsSystem}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Windows Update &amp; Defender" IsChecked="{Binding Config.Goto.SettingsUpdateDefender}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Apps &amp; Startup submenu" IsChecked="{Binding Config.Goto.SettingsApps}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Personalization submenu" IsChecked="{Binding Config.Goto.SettingsPersonalization}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Network &amp; Wi-Fi submenu" IsChecked="{Binding Config.Goto.SettingsNetwork}"/>
-                                </UniformGrid>
-                            </Border>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 8: TASKBAR ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Taskbar}">
-                            <Grid Margin="0,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="Taskbar Category" Style="{StaticResource PageTitleStyle}"/>
-                                    <TextBlock Text="Configure imports/taskbar.nss — taskbar right-click quick apps, window tiling, and Nilesoft Shell admin menu."
-                                               Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <CheckBox HorizontalAlignment="Right" VerticalAlignment="Center" Content="Module Enabled"
-                                          Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Config.General.EnableTaskbarImport}"/>
-                            </Grid>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE75B;" Title="Nilesoft Shell Admin Menu (Shift + Right-Click)"
-                                                    Description="Adds Shell config, manager, directory, version, and docs menu on taskbar."
-                                                    IsChecked="{Binding Config.Taskbar.ShellAdminMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE790;" Title="Include GUI Configurator Shortcut in Shell Menu"
-                                                    Description="Adds a direct 'configurator' item to launch ShellConfigurator.exe from the taskbar."
-                                                    IsChecked="{Binding Config.Taskbar.IncludeConfiguratorShortcut}"/>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE71D;" Title="Apps Submenu" Description="Quick launch utilities from the taskbar menu." IsChecked="{Binding Config.Taskbar.AppsMenu}"/>
-                            <Border Style="{StaticResource AcrylicSubCardStyle}" Margin="20,0,0,10"
-                                    Visibility="{Binding Config.Taskbar.AppsMenu, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <UniformGrid Columns="2">
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Paint" IsChecked="{Binding Config.Taskbar.AppPaint}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Microsoft Edge" IsChecked="{Binding Config.Taskbar.AppEdge}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Calculator" IsChecked="{Binding Config.Taskbar.AppCalculator}"/>
-                                    <CheckBox Margin="4,4" Style="{StaticResource AcrylicToggleSwitchStyle}" Content="Registry Editor" IsChecked="{Binding Config.Taskbar.AppRegedit}"/>
-                                </UniformGrid>
-                            </Border>
-
-                            <ctrl:ToggleSettingCard Glyph="&#xE737;" Title="Windows Arrangement Submenu" Description="Cascade, Stacked, Side by side, Minimize all, Restore all." IsChecked="{Binding Config.Taskbar.WindowsMenu}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE7F4;" Title="Show Desktop" Description="Toggle desktop visibility." IsChecked="{Binding Config.Taskbar.ShowDesktop}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE713;" Title="Settings" Description="Opens Windows Settings." IsChecked="{Binding Config.Taskbar.WindowsSettings}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE9D9;" Title="Task Manager" Description="Launches taskmgr.exe." IsChecked="{Binding Config.Taskbar.TaskManager}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE75B;" Title="Taskbar Settings" Description="Opens ms-settings:taskbar." IsChecked="{Binding Config.Taskbar.TaskbarSettingsLink}"/>
-                            <ctrl:ToggleSettingCard Glyph="&#xE72C;" Title="Restart Explorer (Shift)" Description="Shows Restart Explorer option when Shift is held." IsChecked="{Binding Config.Taskbar.RestartExplorerOnShift}"/>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 9: CUSTOM ITEMS ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Custom}">
-                            <Grid Margin="0,0,0,14">
-                                <StackPanel>
-                                    <TextBlock Text="Custom Context Menu Items" Style="{StaticResource PageTitleStyle}"/>
-                                    <TextBlock Text="Build your own menu entries written cleanly to imports/user.nss."
-                                               Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,0"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Button Content="+ Add Item" Style="{StaticResource AcrylicPrimaryButtonStyle}" Command="{Binding AddCustomItemCommand}" Margin="0,0,8,0"/>
-                                    <Button Content="Duplicate" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding DuplicateCustomItemCommand}" Margin="0,0,8,0"/>
-                                    <Button Content="Delete" Style="{StaticResource AcrylicDangerButtonStyle}" Command="{Binding RemoveCustomItemCommand}"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="260"/>
-                                    <ColumnDefinition Width="14"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- Items List -->
-                                <Border Grid.Column="0" Style="{StaticResource AcrylicCardStyle}" Padding="8" MinHeight="380">
-                                    <Grid>
-                                        <ListBox ItemsSource="{Binding Config.CustomItems}"
-                                                 SelectedItem="{Binding SelectedCustomItem}"
-                                                 Background="Transparent"
-                                                 BorderThickness="0">
-                                            <ListBox.ItemContainerStyle>
-                                                <Style TargetType="ListBoxItem">
-                                                    <Setter Property="Padding" Value="8,7"/>
-                                                    <Setter Property="Margin" Value="0,0,0,4"/>
-                                                    <Setter Property="Cursor" Value="Hand"/>
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="ListBoxItem">
-                                                                <Border x:Name="Bd" CornerRadius="7" Padding="{TemplateBinding Padding}" Background="Transparent">
-                                                                    <ContentPresenter/>
-                                                                </Border>
-                                                                <ControlTemplate.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SubCardBrush}"/>
-                                                                    </Trigger>
-                                                                    <Trigger Property="IsSelected" Value="True">
-                                                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSoftBrush}"/>
-                                                                    </Trigger>
-                                                                </ControlTemplate.Triggers>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </ListBox.ItemContainerStyle>
-                                            <ListBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid>
-                                                        <StackPanel>
-                                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                                            <TextBlock Text="{Binding ContextType, StringFormat=Context: {0}}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                                        </StackPanel>
-                                                        <CheckBox HorizontalAlignment="Right" Style="{StaticResource AcrylicToggleSwitchStyle}" IsChecked="{Binding Enabled}"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ListBox.ItemTemplate>
-                                        </ListBox>
-
-                                        <TextBlock Text="No custom items yet.&#x0a;Click '+ Add Item' to create one."
-                                                   TextAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource TextMutedBrush}"
-                                                   Visibility="{Binding HasCustomItems, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Item Editor -->
-                                <Border Grid.Column="2" Style="{StaticResource AcrylicCardStyle}" MinHeight="380">
-                                    <Grid>
-                                        <StackPanel Visibility="{Binding SelectedCustomItem, Converter={StaticResource NullToCollapsedConverter}}">
-                                            <TextBlock Text="Item Properties" Style="{StaticResource SectionHeadingStyle}"/>
-
-                                            <Grid Margin="0,4,0,10">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="12"/>
-                                                    <ColumnDefinition Width="160"/>
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="Title" Style="{StaticResource SettingLabelStyle}"/>
-                                                    <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,0"
-                                                             Text="{Binding SelectedCustomItem.Title, UpdateSourceTrigger=PropertyChanged}"/>
-                                                </StackPanel>
-                                                <StackPanel Grid.Column="2">
-                                                    <TextBlock Text="Context Type" Style="{StaticResource SettingLabelStyle}"/>
-                                                    <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,5,0,0"
-                                                              ItemsSource="{Binding ContextTypeOptions}"
-                                                              SelectedItem="{Binding SelectedCustomItem.ContextType}"/>
-                                                </StackPanel>
-                                            </Grid>
-
-                                            <Grid Margin="0,0,0,10">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="12"/>
-                                                    <ColumnDefinition Width="160"/>
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="Submenu Group (optional)" Style="{StaticResource SettingLabelStyle}"/>
-                                                    <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,0"
-                                                             Text="{Binding SelectedCustomItem.Submenu, UpdateSourceTrigger=PropertyChanged}"
-                                                             ToolTip="Leave blank to place at root level, or type a submenu name"/>
-                                                </StackPanel>
-                                                <StackPanel Grid.Column="2">
-                                                    <TextBlock Text="Separator" Style="{StaticResource SettingLabelStyle}"/>
-                                                    <ComboBox Style="{StaticResource AcrylicComboBoxStyle}" Margin="0,5,0,0"
-                                                              ItemsSource="{Binding SeparatorOptions}"
-                                                              SelectedItem="{Binding SelectedCustomItem.Separator}"/>
-                                                </StackPanel>
-                                            </Grid>
-
-                                            <TextBlock Text="Command (executable or URL)" Style="{StaticResource SettingLabelStyle}"/>
-                                            <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,10"
-                                                     Text="{Binding SelectedCustomItem.Command, UpdateSourceTrigger=PropertyChanged}"/>
-
-                                            <TextBlock Text="Arguments" Style="{StaticResource SettingLabelStyle}"/>
-                                            <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,10"
-                                                     Text="{Binding SelectedCustomItem.Arguments, UpdateSourceTrigger=PropertyChanged}"/>
-
-                                            <Grid Margin="0,0,0,10">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="16"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="Icon (glyph like \uE10A, icon.copy, or path)" Style="{StaticResource SettingLabelStyle}"/>
-                                                    <TextBox Style="{StaticResource AcrylicTextBoxStyle}" Margin="0,5,0,0"
-                                                             Text="{Binding SelectedCustomItem.Icon, UpdateSourceTrigger=PropertyChanged}"/>
-                                                </StackPanel>
-                                                <CheckBox Grid.Column="2" VerticalAlignment="Bottom" Margin="0,0,0,6"
-                                                          Style="{StaticResource AcrylicToggleSwitchStyle}"
-                                                          Content="Run as Admin"
-                                                          IsChecked="{Binding SelectedCustomItem.RunAsAdmin}"/>
-                                            </Grid>
-                                        </StackPanel>
-
-                                        <TextBlock Text="Select a custom item on the left to edit its properties."
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   Foreground="{DynamicResource TextMutedBrush}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding SelectedCustomItem}" Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                        </StackPanel>
-
-                        <!-- ==================== PAGE 10: NSS PREVIEW & TOOLS ==================== -->
-                        <StackPanel Visibility="{Binding SelectedPage, Converter={StaticResource EqualToVisibilityConverter}, ConverterParameter=Preview}">
-                            <TextBlock Text="Live .NSS Preview &amp; Shell Tools" Style="{StaticResource PageTitleStyle}"/>
-                            <TextBlock Text="Inspect the exact Nilesoft Shell script generated by your choices and manage the Shell registration."
-                                       Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,16"/>
-
-                            <!-- Service Actions Card -->
-                            <Border Style="{StaticResource AcrylicCardStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Nilesoft Shell Service Controls" Style="{StaticResource SectionHeadingStyle}"/>
-                                    <WrapPanel>
-                                        <Button Content="Register Shell (Admin)" Style="{StaticResource AcrylicPrimaryButtonStyle}"
-                                                Command="{Binding RegisterShellCommand}" IsEnabled="{Binding HasShellExecutable}" Margin="0,0,8,6"/>
-                                        <Button Content="Unregister Shell (Admin)" Style="{StaticResource AcrylicDangerButtonStyle}"
-                                                Command="{Binding UnregisterShellCommand}" IsEnabled="{Binding HasShellExecutable}" Margin="0,0,8,6"/>
-                                        <Button Content="Restart Explorer" Style="{StaticResource AcrylicSecondaryButtonStyle}"
-                                                Command="{Binding RestartExplorerCommand}" Margin="0,0,8,6"/>
-                                        <Button Content="Open Shell Folder" Style="{StaticResource AcrylicSecondaryButtonStyle}"
-                                                Command="{Binding OpenFolderCommand}" Margin="0,0,8,6"/>
-                                    </WrapPanel>
-                                    <TextBlock Text="Note: Register / Unregister buttons activate when shell.exe is present in the selected directory."
-                                               Style="{StaticResource SettingDescStyle}" Margin="0,6,0,0"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Generated Code Preview -->
-                            <Border Style="{StaticResource AcrylicCardStyle}">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,10">
-                                        <TextBlock Text="Generated Script File" Style="{StaticResource SectionHeadingStyle}" Margin="0" VerticalAlignment="Center"/>
-                                        <ComboBox HorizontalAlignment="Right" Width="220"
-                                                  Style="{StaticResource AcrylicComboBoxStyle}"
-                                                  ItemsSource="{Binding PreviewFiles}"
-                                                  SelectedItem="{Binding SelectedPreviewFile}"/>
-                                    </Grid>
-
+                                <Border Style="{StaticResource AcrylicGroupStyle}" Padding="10">
                                     <TextBox Text="{Binding PreviewContent, Mode=OneWay}"
                                              IsReadOnly="True"
                                              FontFamily="{StaticResource MonoFont}"
                                              FontSize="12"
-                                             Height="360"
+                                             Height="460"
                                              AcceptsReturn="True"
                                              TextWrapping="NoWrap"
                                              HorizontalScrollBarVisibility="Auto"
                                              VerticalScrollBarVisibility="Auto"
                                              Style="{StaticResource AcrylicTextBoxStyle}"
-                                             Padding="12,10"/>
-                                </StackPanel>
-                            </Border>
+                                             Padding="10,8"/>
+                                </Border>
+                            </StackPanel>
+
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- Clean Footer Bar -->
+                <Border Grid.Row="1"
+                        Background="{StaticResource FooterBrush}"
+                        BorderBrush="{StaticResource DividerBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="16,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,14,0">
+                            <Ellipse Width="7" Height="7" Margin="0,0,8,0" Fill="{StaticResource WarningBrush}"
+                                     Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <Ellipse Width="7" Height="7" Margin="0,0,8,0" Fill="{StaticResource SuccessBrush}"
+                                     Visibility="{Binding HasUnsavedChanges, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
 
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Reload" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding ReloadCommand}" Margin="0,0,8,0"/>
+                            <Button Content="Reset" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding ResetDefaultsCommand}" Margin="0,0,8,0"/>
+                            <Button Content="Save" Style="{StaticResource AcrylicPrimaryButtonStyle}" Command="{Binding SaveCommand}"/>
+                        </StackPanel>
                     </Grid>
-                </ScrollViewer>
+                </Border>
             </Grid>
 
-            <!-- Persistent Bottom Acrylic Action Bar -->
-            <Border Grid.Row="2"
-                    Background="{DynamicResource FooterBrush}"
-                    BorderBrush="{DynamicResource BorderBrushSubtle}"
-                    BorderThickness="0,1,0,0"
-                    Padding="18,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+            <!-- ==================== PORTABLE IMPORT / FRESH SETUP OVERLAY ==================== -->
+            <Grid Grid.Row="1"
+                  Visibility="{Binding IsSetupVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                  Margin="36,28">
+                <StackPanel VerticalAlignment="Center" MaxWidth="760">
+                    <TextBlock Text="Nilesoft Shell Setup" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock Text="Run portable directly from an existing config folder, or start with a fresh configuration."
+                               Style="{StaticResource PageSubtitleStyle}" Margin="0,4,0,22"/>
 
-                    <!-- Status & Unsaved Dot -->
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                        <Ellipse Width="8" Height="8" Margin="0,0,8,0"
-                                 Fill="{DynamicResource WarningBrush}"
-                                 Visibility="{Binding HasUnsavedChanges, Converter={StaticResource BoolToVisibilityConverter}}"
-                                 ToolTip="You have unsaved changes"/>
-                        <Ellipse Width="8" Height="8" Margin="0,0,8,0"
-                                 Fill="{DynamicResource SuccessBrush}"
-                                 Visibility="{Binding HasUnsavedChanges, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
-                        <TextBlock Text="{Binding StatusMessage}"
-                                   FontSize="12.5"
-                                   Foreground="{DynamicResource TextSecondaryBrush}"
-                                   TextTrimming="CharacterEllipsis"/>
-                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <!-- Action Buttons -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button Content="Reload" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding ReloadCommand}" Margin="0,0,8,0"/>
-                        <Button Content="Reset Defaults" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding ResetDefaultsCommand}" Margin="0,0,8,0"/>
-                        <Button Content="Restart Explorer" Style="{StaticResource AcrylicSecondaryButtonStyle}" Command="{Binding RestartExplorerCommand}" Margin="0,0,10,0"/>
-                        <Button Content="Save Configuration" Style="{StaticResource AcrylicPrimaryButtonStyle}" Command="{Binding SaveCommand}"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+                        <!-- Option 1: Import from Existing Folder (Portable) -->
+                        <Border Grid.Column="0" Style="{StaticResource AcrylicGroupStyle}" Padding="18">
+                            <StackPanel>
+                                <TextBlock Text="Import from Folder" FontSize="15.5" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Load your existing shell.nss &amp; imports from an older or original Nilesoft Shell folder. Skips system installation."
+                                           Style="{StaticResource SettingDescStyle}" Margin="0,4,0,14"/>
 
+                                <TextBlock Text="Existing Config Folder" Style="{StaticResource SettingLabelStyle}"/>
+                                <Grid Margin="0,6,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Style="{StaticResource AcrylicTextBoxStyle}" Text="{Binding ImportFolderPath, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Button Grid.Column="1" Content="Browse" Style="{StaticResource AcrylicSecondaryButtonStyle}" Click="BrowseImportFolder_Click" Margin="6,0,0,0"/>
+                                </Grid>
+
+                                <CheckBox Style="{StaticResource AcrylicToggleSwitchStyle}"
+                                          Content="Copy portable app into this folder"
+                                          IsChecked="{Binding CopyAppToImportFolder}"
+                                          Margin="0,0,0,16"/>
+
+                                <Button Content="Import &amp; Launch Portable"
+                                        Style="{StaticResource AcrylicPrimaryButtonStyle}"
+                                        Command="{Binding CompleteImportCommand}"
+                                        HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Option 2: Start with Fresh Config -->
+                        <Border Grid.Column="2" Style="{StaticResource AcrylicGroupStyle}" Padding="18">
+                            <StackPanel>
+                                <TextBlock Text="Start with Fresh Config" FontSize="15.5" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Initialize a clean default configuration in the default portable folder or any directory you choose."
+                                           Style="{StaticResource SettingDescStyle}" Margin="0,4,0,14"/>
+
+                                <TextBlock Text="Target Folder" Style="{StaticResource SettingLabelStyle}"/>
+                                <Grid Margin="0,6,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Style="{StaticResource AcrylicTextBoxStyle}" Text="{Binding FreshFolderPath, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Button Grid.Column="1" Content="Browse" Style="{StaticResource AcrylicSecondaryButtonStyle}" Click="BrowseFreshFolder_Click" Margin="6,0,0,0"/>
+                                </Grid>
+
+                                <CheckBox Style="{StaticResource AcrylicToggleSwitchStyle}"
+                                          Content="Copy portable binaries to folder"
+                                          IsChecked="{Binding FreshCopyBinaries}"
+                                          Margin="0,0,0,8"/>
+
+                                <CheckBox Style="{StaticResource AcrylicToggleSwitchStyle}"
+                                          Content="Register with Windows Explorer (Admin)"
+                                          IsChecked="{Binding FreshRegisterShell}"
+                                          Margin="0,0,0,14"/>
+
+                                <Button Content="Create Fresh Config"
+                                        Style="{StaticResource AcrylicSecondaryButtonStyle}"
+                                        Command="{Binding CompleteFreshSetupCommand}"
+                                        HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Button Content="Cancel"
+                            Style="{StaticResource AcrylicSecondaryButtonStyle}"
+                            Command="{Binding CancelSetupCommand}"
+                            HorizontalAlignment="Right"
+                            Margin="0,12,0,0"
+                            Visibility="{Binding CanCancelSetup, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Border>
 </Window>

@@ -1,0 +1,40 @@
+<UserControl x:Class="Shell.Configurator.Controls.ToggleSettingCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root">
+    <Border Style="{StaticResource AcrylicCardStyle}" Margin="0,0,0,8" Padding="14,11">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Width="32" Height="32"
+                    CornerRadius="7"
+                    Background="{DynamicResource AccentSoftBrush}"
+                    Margin="0,0,12,0"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding Glyph, ElementName=Root, Converter={StaticResource NullToCollapsedConverter}}">
+                <TextBlock Text="{Binding Glyph, ElementName=Root}"
+                           FontFamily="{StaticResource IconFont}"
+                           FontSize="15"
+                           Foreground="{DynamicResource AccentBrush}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Border>
+
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="{Binding Title, ElementName=Root}" Style="{StaticResource SettingLabelStyle}"/>
+                <TextBlock Text="{Binding Description, ElementName=Root}"
+                           Style="{StaticResource SettingDescStyle}"
+                           Visibility="{Binding Description, ElementName=Root, Converter={StaticResource NullToCollapsedConverter}}"/>
+            </StackPanel>
+
+            <CheckBox Grid.Column="2"
+                      Style="{StaticResource AcrylicToggleSwitchStyle}"
+                      IsChecked="{Binding IsChecked, ElementName=Root, Mode=TwoWay}"/>
+        </Grid>
+    </Border>
+</UserControl>

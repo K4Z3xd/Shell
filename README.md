@@ -35,6 +35,26 @@ Features
 * Minimal resource usage.
 * No limitations.
 
+## Acrylic GUI Configurator (`ShellConfigurator`)
+This fork includes a native Windows **.NET 8 WPF** GUI (`src/gui/Shell.Configurator`) featuring a **Dark / Light Windows Acrylic** backdrop to customize every context menu category without editing `.nss` scripts manually:
+
+* **General & Modules** (`shell.nss`) — show delay, hook priority, localization language, and master toggles for every category.
+* **Theme & Acrylic** (`imports/theme.nss`) — live preview, preset, dark mode, density, Acrylic/Blur/Transparent effects, border radius, shadow, and custom font.
+* **Modify System Items** (`imports/modify.nss`) — hide unwanted Windows entries or move items into `More options` / `Pin/Unpin`.
+* **Terminal** (`imports/terminal.nss`) — Command Prompt, PowerShell, Windows Terminal, and Shift/Right-Click admin elevation.
+* **File Manage** (`imports/file-manage.nss`) — Copy Path options, Change Extension, Select, Take Ownership, Show/Hide, Attributes, Register Server, New File/Folder templates, and Folder Options.
+* **Develop** (`imports/develop.nss`) — Editors (VS Code, Notepad), `dotnet` CLI presets, and configurable paths for external tools.
+* **Go To** (`imports/goto.nss`) — System/User folders, Control Panel, Run, and Windows Settings shortcuts.
+* **Taskbar** (`imports/taskbar.nss`) — Quick Apps, Window arrangement, Task Manager, Shell Admin Menu, and direct Configurator launch.
+* **Custom Items** (`imports/user.nss`) — Create, duplicate, toggle, and organize custom context menu actions.
+* **Live `.nss` Preview & Service Tools** — Automatic timestamped backups before saving, Register/Unregister Shell, and Restart Explorer.
+
+### Building the Acrylic GUI Locally
+```powershell
+dotnet publish src/gui/Shell.Configurator/Shell.Configurator.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o src/bin
+```
+GitHub Actions automatically builds both native `Shell.sln` (`shell.dll`, `shell.exe`) and `ShellConfigurator.exe` into the downloadable `shell-x64` / `shell-x86` / `shell-arm64` artifacts.
+
 
 Requirements
 ------------------

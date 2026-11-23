@@ -39,4 +39,9 @@ src/dll/obj/
 src/setup/ca/obj/
 src/setup/wix/obj/
 src/packages/
+src/gui/**/bin/
+src/gui/**/obj/
+src/bin/backups/
+src/bin/shell.configurator.json
+*.pdb
 #src/bin/*.exe

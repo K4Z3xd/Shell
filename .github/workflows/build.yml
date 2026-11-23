@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,9 +22,10 @@ jobs:
 
     env:
       SOLUTION_FILE_PATH: src/Shell.sln
+      GUI_PROJECT_PATH: src/gui/Shell.Configurator/Shell.Configurator.csproj
       BUILD_CONFIGURATION: ${{matrix.configuration}}
       BUILD_PLATFORM: ${{matrix.platform}}
-      BIN_PATH: D:\a\Shell\Shell\src\bin
+      BIN_PATH: ${{github.workspace}}\src\bin
     runs-on: windows-latest
 
     steps:
@@ -32,13 +34,29 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
 
+    - name: Setup .NET 8 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
-    - name: Build
+    - name: Build native Shell (DLL & EXE)
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build Acrylic GUI Configurator
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: >
+        dotnet publish ${{env.GUI_PROJECT_PATH}}
+        -c Release
+        -r win-${{matrix.platform}}
+        --self-contained false
+        -p:PublishSingleFile=true
+        -p:DebugType=None
+        -o "${{env.BIN_PATH}}"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -49,6 +67,7 @@ jobs:
           !${{env.BIN_PATH}}\*.lib
           !${{env.BIN_PATH}}\*.exp
           !${{env.BIN_PATH}}\*.wixpdb
+          !${{env.BIN_PATH}}\*.pdb
           !${{env.BIN_PATH}}\ca.dll
         if-no-files-found: warn
         retention-days: 0
